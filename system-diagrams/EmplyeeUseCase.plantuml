@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+actor Employee
+
+rectangle RecommendationEngine {
+    usecase "Login" as UC1
+    usecase "Receive Notifications" as UC2
+    usecase "Send Recommendations" as UC3
+    usecase "Write Review" as UC4
+    usecase "Send Feedback" as UC5
+    usecase "View Menu" as UC6
+}
+
+Employee --> UC1 : Login
+UC1 --> UC2 : Receive Notifications
+UC1 --> UC3 : Send Recommendations
+UC1 --> UC4 : Write Review
+UC1 --> UC5 : Send Feedback
+UC1 --> UC6 : View Menu
+
+@enduml
