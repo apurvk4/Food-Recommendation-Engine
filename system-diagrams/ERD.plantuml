@@ -1,0 +1,62 @@
+@startuml
+entity "Employee" as Employee {
+    * employee_id : int
+    * name : string
+    * password : string
+}
+
+entity "Chef" as Chef {
+    * chef_id : int
+    * name : string
+    * password : string
+}
+
+entity "Admin" as Admin {
+    * admin_id : int
+    * name : string
+    * password : string
+}
+
+entity "Menu Item" as MenuItem {
+    * item_id : int
+    * name : string
+    * price : float
+    * availability_status : boolean
+}
+
+entity "Recommendation" as Recommendation {
+    * recommendation_id : int
+    * item_id : int
+    * date : date
+    * employee_id : int
+}
+
+entity "Feedback" as Feedback {
+    * feedback_id : int
+    * item_id : int
+    * employee_id : int
+    * rating : int
+    * comment : string
+    * date : date
+}
+
+entity "Notification" as Notification {
+    * notification_id : int
+    * type : string
+    * message : string
+    * date : date
+}
+
+Employee ||--o{ Recommendation : "sends"
+Recommendation }|--|| MenuItem : "is for"
+
+Employee ||--o{ Feedback : "writes"
+Feedback }|--|| MenuItem : "is for"
+
+Chef ||--o{ Notification : "receives"
+Admin ||--o{ Notification : "receives"
+Employee ||--o{ Notification : "receives"
+
+Admin ||--o{ MenuItem : "manages"
+Chef ||--o{ MenuItem : "recommends"
+@enduml
