@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+actor Admin
+
+rectangle RecommendationEngine {
+    usecase "Login" as UC1
+    usecase "Add Menu Item" as UC2
+    usecase "Update Menu Item" as UC3
+    usecase "Delete Menu Item" as UC4
+    usecase "Add Employee" as UC5
+}
+
+Admin --> UC1 : Login
+UC1 --> UC2 : Add Menu Item
+UC1 --> UC3 : Update Menu Item
+UC1 --> UC4 : Delete Menu Item
+UC1 --> UC5 : Add Employee
+
+@enduml
