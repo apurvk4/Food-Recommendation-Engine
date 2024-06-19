@@ -1,0 +1,17 @@
+@startuml
+left to right direction
+actor Chef
+
+rectangle RecommendationEngine {
+    usecase "Login" as UC1
+    usecase "Receive Notifications" as UC2
+    usecase "Send Recommendations" as UC3
+    usecase "Generate Report" as UC4
+}
+
+Chef --> UC1 : Login
+UC1 --> UC2 : Receive Notifications
+UC1 --> UC3 : Send Recommendations
+UC1 --> UC4 : Generate Report
+
+@enduml
