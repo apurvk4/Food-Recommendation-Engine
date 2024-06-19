@@ -47,21 +47,16 @@ add_link_options(-fsanitize=address)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Find packages
-if (NOT TARGET mysqlcppconn)
-    find_package(mysqlcppconn REQUIRED) 
-endif()
+find_package(mysqlcppconn REQUIRED)
 
 find_package(Threads REQUIRED)
 
 # Link against libraries using keywords
 target_link_libraries(${PROJECT_NAME} PRIVATE mysqlcppconn::mysqlcppconn ${CMAKE_THREAD_LIBS_INIT})
 
-# Call deploy function
-# mysqlcppconn_deploy(${PROJECT_NAME})
-
 # Set C++ standard to 14
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS NO
 )

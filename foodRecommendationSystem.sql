@@ -28,7 +28,8 @@ CREATE TABLE `User`(
     `userId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
-    `roleId` BIGINT UNSIGNED NOT NULL REFERENCES `Role`(`roleId`) ON DELETE CASCADE
+    `roleId` BIGINT UNSIGNED NOT NULL REFERENCES `Role`(`roleId`) ON DELETE CASCADE,
+    `lastNotificationId` BIGINT UNSIGNED NULL DEFAULT NULL REFERENCES `Notification`(`notificationId`) ON DELETE SET NULL
 );
 
 INSERT INTO `User`(`name`, `password`, `roleId`) VALUES('admin', 'admin', 1), ('employee', 'employee', 2), ('chef', 'chef', 3);
@@ -69,6 +70,7 @@ CREATE TABLE `ScheduledMenu`(
     `scheduledMenuId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `menuId` BIGINT UNSIGNED NOT NULL REFERENCES `Menu`(`menuId`) ON DELETE CASCADE,
     `date` DATETIME NOT NULL
+    `isSurveyMenu` BOOLEAN NOT NULL DEFAULT 1
 );
 
 ALTER TABLE
