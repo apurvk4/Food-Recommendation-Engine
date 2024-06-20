@@ -16,7 +16,14 @@ UserService::UserService(std::shared_ptr<IUserDAO> userDAO,
 
 std::vector<User> UserService::getAllUsers() { return userDAO->getAllUsers(); }
 
-User UserService::getUserById(uint64_t id) { return userDAO->getUserById(id); }
+User UserService::getUserById(uint64_t id) {
+  if (userDAO != nullptr) {
+    std::cout << "userDAO not null\n";
+    return userDAO->getUserById(id);
+  }
+  std::cout << "userDAO invalid\n";
+  throw std::invalid_argument("userDAO invalid");
+}
 
 bool UserService::addUser(User user) { return userDAO->addUser(user); }
 

@@ -2,54 +2,74 @@
 
 #include "SString.h"
 #include "SerializableTypes.h"
+#include "SerializableTypes/Serializable.h"
 
 #pragma pack(1)
 struct ProtocolHeader {
-  U8 protocolVersion;
   U32 senderIp;
   U16 senderPort;
   U32 receiverIp;
   U16 receiverPort;
-  U8 messageType;
-  U32 messageHeaderSize;
-};
-
-enum MessageType : uint8_t {
-  REQUEST = 0,
-  RESPONSE = 1,
-};
-
-struct RequestHeader {
-  U64 userId;
-  U8 verb;
+  U32 requestId;
   U64 payloadSize;
-  SString endpoint;
-};
-
-struct ResponseHeader {
-  U64 userId;
-  U8 verb;
-  U64 payloadSize;
-  U16 responseCode;
-  SString endpoint;
-};
-
-enum verbs : uint8_t {
-  GET = 0,
-  POST = 1,
-  PUT = 2,
 };
 
 struct TCPRequest {
   ProtocolHeader protocolHeader;
-  RequestHeader requestHeader;
   unsigned char *payload;
 };
 
 struct TCPResponse {
   ProtocolHeader protocolHeader;
-  ResponseHeader responseHeader;
   unsigned char *payload;
+};
+
+struct UserData : public Serializable {
+  U64 userId;
+  std::vector<unsigned char> serialize() override {
+    std::vector<unsigned char> serialized;
+    std::vector<unsigned char> userIdSerialized = userId.serialize();
+    serialized.insert(serialized.end(), userIdSerialized.begin(),
+                      userIdSerialized.end());
+    return serialized;
+  }
+  uint64_t deserialize(const std::vector<unsigned char> &data) override {
+    std::vector<unsigned char> userIdData(data.begin(), data.begin() + 8);
+    uint64_t bytesRead = userId.deserialize(userIdData);
+    return bytesRead;
+  }
+  size_t getSize() override { return userId.getSize(); }
+};
+
+struct loginData : public Serializable {
+  U64 userId;
+  U64 roleId;
+  SString password;
+  std::vector<unsigned char> serialize() override {
+    std::vector<unsigned char> serialized;
+    std::vector<unsigned char> userIdSerialized = userId.serialize();
+    std::vector<unsigned char> roleIdSerialized = roleId.serialize();
+    std::vector<unsigned char> passwordSerialized = password.serialize();
+    serialized.insert(serialized.end(), userIdSerialized.begin(),
+                      userIdSerialized.end());
+    serialized.insert(serialized.end(), roleIdSerialized.begin(),
+                      roleIdSerialized.end());
+    serialized.insert(serialized.end(), passwordSerialized.begin(),
+                      passwordSerialized.end());
+    return serialized;
+  }
+  uint64_t deserialize(const std::vector<unsigned char> &data) override {
+    std::vector<unsigned char> userIdData(data.begin(), data.begin() + 8);
+    uint64_t bytesRead = userId.deserialize(userIdData);
+    std::vector<unsigned char> roleIdData(data.begin() + 8, data.begin() + 16);
+    bytesRead += roleId.deserialize(roleIdData);
+    std::vector<unsigned char> passwordData(data.begin() + 16, data.end());
+    bytesRead += password.deserialize(passwordData);
+    return bytesRead;
+  }
+  size_t getSize() override {
+    return userId.getSize() + password.getSize() + roleId.getSize();
+  }
 };
 
 #pragma pop()

@@ -12,25 +12,27 @@
 #include <string>
 #include <unordered_map>
 
-typedef std::pair<ErrorStatus, std::vector<unsigned char>> (*HandlerFn)(
-    std::vector<unsigned char>, TCPRequest);
-
 namespace Server {
 
 class RequestHandler {
-  std::unordered_map<std::string, HandlerFn> registeredEndpoints;
+
   std::pair<TCPRequest, std::vector<unsigned char>>
   parseHeaders(std::vector<unsigned char> &data);
-  void writeResponseHeader(std::vector<unsigned char> &responseBuffer,
-                           ResponseHeader &responseHeader);
   void writeProtocolHeader(std::vector<unsigned char> &buffer,
                            ProtocolHeader &header);
+  void handleLoginRequest(TcpSocket socket, TCPRequest request,
+                          std::vector<unsigned char> payload);
+  void handleGetFoodItemsRequest(TcpSocket socket, TCPRequest request,
+                                 std::vector<unsigned char> payload);
+  void handleRequest(TcpSocket socket, U32 requestId, TCPRequest request,
+                     std::vector<unsigned char> payload);
+  void handleAddFoodItemRequest(TcpSocket socket, TCPRequest request,
+                                std::vector<unsigned char> payload);
 
 public:
   RequestHandler(){};
   RequestHandler(const RequestHandler &) = delete;
   RequestHandler &operator=(const RequestHandler &) = delete;
-  void registerEndpoint(std::string endpoint, HandlerFn handler);
   void handleRequest(TcpSocket socket);
   ~RequestHandler() = default;
 };

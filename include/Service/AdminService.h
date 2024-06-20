@@ -26,6 +26,7 @@ public:
   bool addFoodItem(uint64_t adminUserId, FoodItem foodItem);
   bool removeFoodItem(uint64_t adminUserId, uint64_t foodItemId);
   bool updateFoodItem(uint64_t adminUserId, FoodItem foodItem);
+  std::vector<FoodItem> getFoodItems(uint64_t adminUserId);
 };
 
 }; // namespace Service

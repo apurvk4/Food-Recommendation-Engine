@@ -33,6 +33,7 @@ void TcpSocket::connect() {
   sockaddr_in addr;
   addr.sin_family = AF_INET;
   addr.sin_port = remotePort;
+  std::cout << "remote port : " << remotePort << std::endl;
   addr.sin_addr = remoteIp;
   if (::connect(socket, (sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
     throw SocketException("Failed to connect", socket,
@@ -71,17 +72,11 @@ std::vector<unsigned char> TcpSocket::receiveData() {
 }
 
 void TcpSocket::sendData(std::vector<unsigned char> &dataToSend) {
-  int totalBytesSend = 0;
   int bytesSend = 0;
-  do {
-    bytesSend = ::send(socket, (char *)dataToSend.data() + totalBytesSend,
-                       dataToSend.size() - totalBytesSend, 0);
-    if (bytesSend > 0) {
-      totalBytesSend += bytesSend;
-    }
-  } while (bytesSend != -1);
-  if (totalBytesSend == SOCKET_ERROR) {
-    throw SocketException("Failed to send data", socket,
+  bytesSend = ::send(socket, (char *)dataToSend.data(), dataToSend.size(), 0);
+  std::cout << "bytesSend : " << bytesSend << std::endl;
+  if (bytesSend == SOCKET_ERROR) {
+    throw SocketException("Failed to send Data to remote ", socket,
                           ErrorStatus::E_TcpSendError);
   }
 }

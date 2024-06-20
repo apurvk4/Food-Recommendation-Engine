@@ -66,6 +66,7 @@ void FoodRecommendationServer::handleAcceptedSocket(SOCKET acceptedSocket,
     return;
   }
   try {
+    std::cout << "\nConnected to client\n";
     TcpSocket socket{acceptedSocket,
                      Socket::convertIpAddress(remoteAddress.sin_addr),
                      remoteAddress.sin_port, serverAddress.sin_port,

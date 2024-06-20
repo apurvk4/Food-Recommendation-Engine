@@ -67,7 +67,7 @@ void MenuTypeDAO::addMenuType(MenuType menuType) {
   std::unique_ptr<sql::PreparedStatement> addMenuTypeStatement(
       connection->prepareStatement(
           "INSERT INTO MenuType (menuType) VALUES (?)"));
-  addMenuTypeStatement->setString(1, menuType.menuType);
+  addMenuTypeStatement->setString(1, (std::string)menuType.menuType);
   addMenuTypeStatement->execute();
 }
 
@@ -76,7 +76,7 @@ void MenuTypeDAO::updateMenuType(MenuType menuType) {
   std::unique_ptr<sql::PreparedStatement> updateMenuTypeStatement(
       connection->prepareStatement(
           "UPDATE MenuType SET menuType = ? WHERE menuTypeId = ?"));
-  updateMenuTypeStatement->setString(1, menuType.menuType);
+  updateMenuTypeStatement->setString(1, (std::string)menuType.menuType);
   updateMenuTypeStatement->setUInt64(2, menuType.menuTypeId);
   updateMenuTypeStatement->execute();
 }

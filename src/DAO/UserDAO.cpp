@@ -27,7 +27,13 @@ std::vector<User> UserDAO::getAllUsers() {
 }
 
 User UserDAO::getUserById(int userId) {
+  if (dbConnection == nullptr) {
+    throw std::invalid_argument("Connection is not established");
+  }
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
+  if (connection == nullptr) {
+    throw std::invalid_argument("Connection is not established");
+  }
   std::unique_ptr<sql::PreparedStatement> preparedStatement(
       connection->prepareStatement("SELECT * FROM User WHERE userId = ?"));
   preparedStatement->setInt(1, userId);
@@ -37,8 +43,10 @@ User UserDAO::getUserById(int userId) {
     uint64_t roleId = resultSet->getUInt64("roleId");
     std::string password = resultSet->getString("password");
     uint64_t lastNotificationId = resultSet->getUInt64("lastNotificationId");
+    std::cout << "User found\n";
     return User(userId, userName, password, roleId, lastNotificationId);
   }
+  std::cout << "User Not found\n";
   throw std::invalid_argument("Invalid userId, cannot find user with given "
                               "userId : " +
                               std::to_string(userId));
@@ -49,9 +57,9 @@ bool UserDAO::addUser(User user) {
   std::unique_ptr<sql::PreparedStatement> preparedStatement(
       connection->prepareStatement("INSERT INTO User (name, roleId, "
                                    "password) VALUES (?, ?, ?)"));
-  preparedStatement->setString(1, user.name);
+  preparedStatement->setString(1, (std::string)user.name);
   preparedStatement->setInt(2, user.roleId);
-  preparedStatement->setString(3, user.password);
+  preparedStatement->setString(3, (std::string)user.password);
   return preparedStatement->execute();
 }
 
@@ -60,7 +68,7 @@ bool UserDAO::updateUser(User user) {
   std::unique_ptr<sql::PreparedStatement> preparedStatement(
       connection->prepareStatement("UPDATE User SET name = ?, roleId = ?, "
                                    "lastNotificatioId = ? WHERE userId = ?"));
-  preparedStatement->setString(1, user.name);
+  preparedStatement->setString(1, (std::string)user.name);
   preparedStatement->setInt(2, user.roleId);
   preparedStatement->setInt(3, user.lastNotificationId);
   return preparedStatement->execute();

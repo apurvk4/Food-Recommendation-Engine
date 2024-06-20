@@ -54,7 +54,7 @@ bool ScheduledMenuDAO::addScheduledMenu(DTO::ScheduledMenu scheduledMenu) {
   prepStmt = std::shared_ptr<
       sql::PreparedStatement>(connection->prepareStatement(
       "INSERT INTO scheduledMenu (date, menuId,isSurveyMenu) VALUES (?, ?)"));
-  prepStmt->setString(1, scheduledMenu.date);
+  prepStmt->setString(1, (std::string)scheduledMenu.date);
   prepStmt->setUInt64(2, scheduledMenu.menuId);
   prepStmt->setBoolean(3, scheduledMenu.isSurveyMenu);
   return prepStmt->execute();
@@ -77,7 +77,7 @@ bool ScheduledMenuDAO::updateScheduledMenu(DTO::ScheduledMenu scheduledMenu) {
       std::shared_ptr<sql::PreparedStatement>(connection->prepareStatement(
           "UPDATE scheduledMenu SET date = ?, menuId = ? , isSurveyMenu = ?"
           "WHERE scheduledMenuId = ?"));
-  prepStmt->setString(1, scheduledMenu.date);
+  prepStmt->setString(1, (std::string)scheduledMenu.date);
   prepStmt->setUInt64(2, scheduledMenu.menuId);
   prepStmt->setBoolean(3, scheduledMenu.isSurveyMenu);
   prepStmt->setUInt64(4, scheduledMenu.scheduledMenuId);

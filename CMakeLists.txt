@@ -48,7 +48,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Find packages
 find_package(mysqlcppconn REQUIRED)
-
 find_package(Threads REQUIRED)
 
 # Link against libraries using keywords
@@ -60,6 +59,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS NO
 )
+
+# Set default build type to Debug if not specified
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
+# Set debug flags
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
 # Enable multiprocessing for MSVC
 if (MSVC)

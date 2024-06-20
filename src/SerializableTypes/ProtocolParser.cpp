@@ -1,5 +1,6 @@
 #include "SerializableTypes/ProtocolParser.h"
 #include <cstdint>
+#include <iostream>
 
 ProtocolParser::ProtocolParser(const std::vector<unsigned char> &buffer)
     : buffer(buffer), protocolHeaderParsed(false), protocolHeaderBytesRead(0) {}
@@ -48,34 +49,36 @@ U16 ProtocolParser::getReceiverPort() {
   return parsedHeader.receiverPort;
 }
 
-U8 ProtocolParser::getProtocolVersion() {
+U64 ProtocolParser::getPayloadSize() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
     protocolHeaderParsed = true;
   }
-  return parsedHeader.protocolVersion;
+  return parsedHeader.payloadSize;
 }
 
-MessageType ProtocolParser::getMessageType() {
+U32 ProtocolParser::getRequestId() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
     protocolHeaderParsed = true;
   }
-  return static_cast<MessageType>((uint8_t)parsedHeader.messageType);
+  return parsedHeader.requestId;
 }
 
-U32 ProtocolParser::getMessageHeaderSize() {
+std::vector<unsigned char> ProtocolParser::getPayload() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
     protocolHeaderParsed = true;
   }
-  return parsedHeader.messageHeaderSize;
+  // total payload size
+  std::cout << "payload size: " << parsedHeader.payloadSize << "\n";
+  return safeSubVector(buffer, protocolHeaderBytesRead, buffer.size());
 }
 
 ProtocolHeader ProtocolParser::parseHeader() {
   ProtocolHeader header;
-  uint64_t bytesRead = header.protocolVersion.deserialize(buffer);
-  bytesRead += header.senderIp.deserialize(
+  uint64_t bytesRead = 0;
+  bytesRead = header.senderIp.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
   bytesRead += header.senderPort.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint16_t)));
@@ -83,10 +86,10 @@ ProtocolHeader ProtocolParser::parseHeader() {
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
   bytesRead += header.receiverPort.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint16_t)));
-  bytesRead += header.messageType.deserialize(
-      safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint8_t)));
-  bytesRead += header.messageHeaderSize.deserialize(
+  bytesRead += header.requestId.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
+  bytesRead += header.payloadSize.deserialize(
+      safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint64_t)));
   protocolHeaderBytesRead = bytesRead;
   return header;
 }

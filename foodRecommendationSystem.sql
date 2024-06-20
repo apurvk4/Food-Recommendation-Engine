@@ -34,6 +34,14 @@ CREATE TABLE `User`(
 
 INSERT INTO `User`(`name`, `password`, `roleId`) VALUES('admin', 'admin', 1), ('employee', 'employee', 2), ('chef', 'chef', 3);
 
+
+CREATE TABLE `Login`(
+    `loginId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `userId` BIGINT UNSIGNED NOT NULL,
+    `loginTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`userId`) REFERENCES `User`(`userId`) ON DELETE CASCADE
+);
+
 CREATE TABLE `Notification`(
     `notificationId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `message` TEXT NOT NULL,
@@ -66,12 +74,14 @@ CREATE TABLE `Menu`(
     `menuTypeId` BIGINT UNSIGNED NULL REFERENCES `MenuType`(`menuTypeId`) ON DELETE SET NULL
 );
 
-CREATE TABLE `ScheduledMenu`(
+CREATE TABLE `ScheduledMenu` (
     `scheduledMenuId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `menuId` BIGINT UNSIGNED NOT NULL REFERENCES `Menu`(`menuId`) ON DELETE CASCADE,
-    `date` DATETIME NOT NULL
-    `isSurveyMenu` BOOLEAN NOT NULL DEFAULT 1
+    `menuId` BIGINT UNSIGNED NOT NULL,
+    `date` DATETIME NOT NULL,
+    `isSurveyMenu` TINYINT(1) NOT NULL DEFAULT 1,
+    FOREIGN KEY (`menuId`) REFERENCES `Menu`(`menuId`) ON DELETE CASCADE
 );
+
 
 ALTER TABLE
     `ScheduledMenu` ADD INDEX `scheduledmenu_date_index`(`date`);
@@ -211,3 +221,25 @@ END $$
 
 
 DELIMITER ;	
+
+INSERT INTO `FoodItem`(`itemName`, `price`, `availabilityStatus`, `foodItemTypeId`) VALUES
+('Idli', 30.00, 1, 1), -- Breakfast
+('Dosa', 50.00, 1, 1), -- Breakfast
+('Upma', 40.00, 1, 1), -- Breakfast
+('Poha', 35.00, 1, 1), -- Breakfast
+('Paratha', 45.00, 1, 1), -- Breakfast
+('Paneer Butter Masala', 150.00, 1, 2), -- Lunch
+('Chicken Biryani', 180.00, 1, 2), -- Lunch
+('Vegetable Pulao', 120.00, 1, 2), -- Lunch
+('Dal Tadka', 80.00, 1, 2), -- Lunch
+('Rajma Chawal', 100.00, 1, 2), -- Lunch
+('Palak Paneer', 140.00, 1, 2), -- Lunch
+('Masala Dosa', 60.00, 1, 1), -- Breakfast
+('Aloo Gobi', 90.00, 1, 2), -- Lunch
+('Samosa', 20.00, 1, 1), -- Breakfast
+('Butter Chicken', 200.00, 1, 3), -- Dinner
+('Rogan Josh', 220.00, 1, 3), -- Dinner
+('Chole Bhature', 80.00, 1, 2), -- Lunch
+('Paneer Tikka', 130.00, 1, 3), -- Dinner
+('Fish Curry', 160.00, 1, 3), -- Dinner
+('Gulab Jamun', 50.00, 1, 3); -- Dinner

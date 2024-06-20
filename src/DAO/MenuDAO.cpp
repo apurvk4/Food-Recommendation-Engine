@@ -15,7 +15,7 @@ uint64_t MenuDAO::addMenu(DTO::Menu menu) {
   prepStmt =
       std::shared_ptr<sql::PreparedStatement>(connection->prepareStatement(
           "INSERT INTO Menu (menuName, menuTypeId) VALUES (?, ?)"));
-  prepStmt->setString(1, menu.menuName);
+  prepStmt->setString(1, (std::string)menu.menuName);
   prepStmt->setUInt64(2, menu.menuTypeId);
   prepStmt->execute();
   // get last inserted id
@@ -45,7 +45,7 @@ bool MenuDAO::updateMenu(DTO::Menu menu) {
       std::shared_ptr<sql::PreparedStatement>(connection->prepareStatement(
           "UPDATE Menu SET menuName = ?, menuTypeId = ? "
           "WHERE menuId = ?"));
-  prepStmt->setString(1, menu.menuName);
+  prepStmt->setString(1, (std::string)menu.menuName);
   prepStmt->setUInt64(2, menu.menuTypeId);
   prepStmt->setUInt64(3, menu.menuId);
   return prepStmt->execute();

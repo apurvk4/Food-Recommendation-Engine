@@ -26,7 +26,7 @@ using Service::UserService;
 
 bool EmployeeService::verifyRole(uint64_t userId) {
   auto role = getRole(userId);
-  return role.roleName == "Employee";
+  return role.roleName == (std::string) "Employee";
 }
 
 EmployeeService::EmployeeService(

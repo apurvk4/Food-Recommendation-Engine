@@ -20,7 +20,7 @@ public:
   U16 getSenderPort();
   U32 getReceiverIp();
   U16 getReceiverPort();
-  U8 getProtocolVersion();
-  MessageType getMessageType();
-  U32 getMessageHeaderSize();
+  U32 getRequestId();
+  U64 getPayloadSize();
+  std::vector<unsigned char> getPayload();
 };

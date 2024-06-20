@@ -43,7 +43,8 @@ public:
     uint64_t tempValue = 0;
     memcpy(&tempValue, &value, sizeof(double));
     tempValue = hton64(tempValue);
-    memcpy(bytes.data(), &tempValue, sizeof(double));
+    bytes.insert(bytes.end(), (unsigned char *)&tempValue,
+                 (unsigned char *)&tempValue + sizeof(double));
     return bytes;
   }
   uint64_t deserialize(const std::vector<unsigned char> &bytes) override {
@@ -51,7 +52,7 @@ public:
       throw std::runtime_error("Too few bytes to deserialize");
     }
     value = 0;
-    memcpy(&value, bytes.data(), sizeof(double));
+    memcpy(&value, bytes.data(), sizeof(value));
     uint64_t *tempValue = (uint64_t *)&value;
     *tempValue = ntoh64(*tempValue);
     return sizeof(value);

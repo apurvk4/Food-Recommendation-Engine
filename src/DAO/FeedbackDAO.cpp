@@ -21,8 +21,8 @@ bool FeedbackDAO::addFeedback(Feedback feedback) {
   addFeedbackStatement->setUInt64(2, feedback.menuId);
   addFeedbackStatement->setUInt64(3, feedback.foodItemId);
   addFeedbackStatement->setInt(4, feedback.rating);
-  addFeedbackStatement->setString(5, feedback.comment);
-  addFeedbackStatement->setString(6, feedback.date);
+  addFeedbackStatement->setString(5, (std::string)feedback.comment);
+  addFeedbackStatement->setString(6, (std::string)feedback.date);
   return addFeedbackStatement->execute();
 }
 
@@ -40,8 +40,8 @@ Feedback FeedbackDAO::getFeedbackById(uint64_t feedbackId) {
     uint64_t menuId = feedbackResult->getUInt64("menuId");
     uint64_t foodItemId = feedbackResult->getUInt64("foodItemId");
     uint32_t rating = feedbackResult->getUInt("rating");
-    std::string comment = feedbackResult->getString("comment");
-    std::string date = feedbackResult->getString("date");
+    SString comment = (std::string)feedbackResult->getString("comment");
+    SString date = (std::string)feedbackResult->getString("date");
     return Feedback{feedbackId, userId,  menuId, foodItemId,
                     rating,     comment, date};
   }
@@ -65,8 +65,8 @@ std::vector<Feedback> FeedbackDAO::getFeedbacksByMenuId(uint64_t menuId) {
     uint64_t menuId = feedbackResult->getUInt64("menuId");
     uint64_t foodItemId = feedbackResult->getUInt64("foodItemId");
     int rating = feedbackResult->getInt("rating");
-    std::string comment = feedbackResult->getString("comment");
-    std::string date = feedbackResult->getString("date");
+    SString comment = (std::string)feedbackResult->getString("comment");
+    SString date = (std::string)feedbackResult->getString("date");
     feedbacks.emplace_back(feedbackId, userId, menuId, foodItemId, rating,
                            comment, date);
   }
@@ -87,8 +87,8 @@ std::vector<Feedback> FeedbackDAO::getFeedbacksByUserId(uint64_t userId) {
     uint64_t menuId = feedbackResult->getUInt64("menuId");
     uint64_t foodItemId = feedbackResult->getUInt64("foodItemId");
     int rating = feedbackResult->getInt("rating");
-    std::string comment = feedbackResult->getString("comment");
-    std::string date = feedbackResult->getString("date");
+    SString comment = (std::string)feedbackResult->getString("comment");
+    SString date = (std::string)feedbackResult->getString("date");
     feedbacks.emplace_back(feedbackId, userId, menuId, foodItemId, rating,
                            comment, date);
   }
@@ -111,8 +111,8 @@ FeedbackDAO::getFeedbacksByFoodItemId(uint64_t foodItemId) {
     uint64_t menuId = feedbackResult->getUInt64("menuId");
     foodItemId = feedbackResult->getUInt64("foodItemId");
     int rating = feedbackResult->getInt("rating");
-    std::string comment = feedbackResult->getString("comment");
-    std::string date = feedbackResult->getString("date");
+    SString comment = (std::string)feedbackResult->getString("comment");
+    SString date = (std::string)feedbackResult->getString("date");
     feedbacks.emplace_back(feedbackId, userId, menuId, foodItemId, rating,
                            comment, date);
   }
@@ -131,8 +131,8 @@ std::vector<Feedback> FeedbackDAO::getAllFeedbacks() {
     uint64_t menuId = feedbackResult->getUInt64("menuId");
     uint64_t foodItemId = feedbackResult->getUInt64("foodItemId");
     int rating = feedbackResult->getInt("rating");
-    std::string comment = feedbackResult->getString("comment");
-    std::string date = feedbackResult->getString("date");
+    SString comment = (std::string)feedbackResult->getString("comment");
+    SString date = (std::string)feedbackResult->getString("date");
     feedbacks.emplace_back(feedbackId, userId, menuId, foodItemId, rating,
                            comment, date);
   }

@@ -16,7 +16,7 @@ bool NotificationDAO::sendNotification(Notification notification) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
       "INSERT INTO Notifications (message) VALUES (?)"));
-  prepStmt->setString(1, notification.message);
+  prepStmt->setString(1, (std::string)notification.message);
   return prepStmt->execute();
 }
 
@@ -32,7 +32,7 @@ bool NotificationDAO::updateNotification(Notification notification) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
       "UPDATE Notifications SET message = ? WHERE notificationId = ?"));
-  prepStmt->setString(1, notification.message);
+  prepStmt->setString(1, (std::string)notification.message);
   prepStmt->setUInt64(2, notification.notificationId);
   return prepStmt->execute();
 }

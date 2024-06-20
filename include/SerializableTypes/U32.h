@@ -10,7 +10,7 @@ class U32 : public Serializable {
   uint32_t value;
 
 public:
-  U32(uint8_t value = 0) : value{value} {}
+  U32(uint32_t value = 0) : value{value} {}
   operator uint32_t() const { return value; }
 
   U32 operator+(const U32 &other) const { return U32(value + other.value); }

@@ -28,7 +28,7 @@ ChefService::ChefService(std::shared_ptr<IUserDAO> userDAO,
 bool ChefService::createSurveyMenu(uint64_t chefUserId, Menu menu,
                                    std::vector<MenuItem> menuItems) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   auto menuId = menuDAO->addMenu(menu);
@@ -62,7 +62,7 @@ bool ChefService::createSurveyMenu(uint64_t chefUserId, Menu menu,
 bool ChefService::setTodaysMenu(uint64_t chefUserId, Menu menu,
                                 std::vector<MenuItem> menuItems) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   // check if this menu is already present
@@ -94,7 +94,7 @@ bool ChefService::setTodaysMenu(uint64_t chefUserId, Menu menu,
 std::vector<DTO::Menu> ChefService::getAvailableMenus(uint64_t chefUserId,
                                                       uint64_t menuType) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   return menuDAO->getMenusByType(menuType);
@@ -103,7 +103,7 @@ std::vector<DTO::Menu> ChefService::getAvailableMenus(uint64_t chefUserId,
 std::vector<DTO::FoodItem> ChefService::getFoodItems(uint64_t chefUserId,
                                                      uint64_t menuId) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   auto menuItems = menuItemDAO->getMenuItemByMenuId(menuId);
@@ -118,7 +118,7 @@ std::pair<DTO::Menu, std::vector<DTO::FoodItem>>
 ChefService::getNextRecommendedMenu(uint64_t chefUserId,
                                     DTO::MenuType menuType) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   // auto menu = menuDAO->getMenusByType(menuType.menuTypeId);
@@ -127,7 +127,7 @@ ChefService::getNextRecommendedMenu(uint64_t chefUserId,
   // for (auto &menuItem : menuItems) {
   //   foodItems.push_back(foodItemDAO->getFoodItemById(menuItem.foodItemId));
   // }
-  Menu menu{0, "Recommended Menu", menuType.menuTypeId};
+  Menu menu{0, (std::string) "Recommended Menu", menuType.menuTypeId};
   return std::make_pair(menu, foodItems);
 }
 
@@ -135,7 +135,7 @@ std::vector<UserResponse> ChefService::getUserPreferences(uint64_t chefUserId,
                                                           MenuType menuType,
                                                           std::string date) {
   auto role = getRole(chefUserId);
-  if (role.roleName != "Chef") {
+  if (role.roleName != (std::string) "Chef") {
     throw std::runtime_error("User does not have permission to create menu");
   }
   auto scheduledMenu = scheduledDAO->getScheduledMenuByDate(date);
