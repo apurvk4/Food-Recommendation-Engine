@@ -2,6 +2,7 @@
 
 #include "SerializableTypes/SString.h"
 #include "SerializableTypes/Serializable.h"
+#include "SerializableTypes/U64.h"
 #include <cstdint>
 #include <string>
 

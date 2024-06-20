@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SerializableTypes/SString.h"
+#include "SerializableTypes/U64.h"
 #include <cstdint>
 #include <string>
 namespace DTO {

@@ -38,7 +38,6 @@ public:
   std::vector<unsigned char> serialize() override {
     uint64_t tempValue = 0;
     memcpy(&tempValue, &value, sizeof(int64_t));
-    tempValue = hton64(tempValue);
     std::vector<unsigned char> bytes(sizeof(int64_t), 0);
     memcpy(bytes.data(), &tempValue, sizeof(int64_t));
     return bytes;
@@ -50,7 +49,6 @@ public:
     }
     memcpy(&value, bytes.data(), sizeof(int64_t));
     uint64_t *tempValue = (uint64_t *)&value;
-    *tempValue = ntoh64(*tempValue);
     return sizeof(value);
   }
 };

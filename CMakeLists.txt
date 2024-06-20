@@ -4,6 +4,16 @@ project("FoodRecommendationSystem")
 
 message(STATUS "[${PROJECT_NAME}] Processing ${CMAKE_CURRENT_LIST_FILE}")
 
+# Force the use of Clang if available
+find_program(CLANG_CPP NAMES clang++ clang++-10 clang++-9 clang++-8 clang++-7 clang++-6 clang++-5)
+
+if(CLANG_CPP)
+    set(CMAKE_CXX_COMPILER ${CLANG_CPP})
+    message(STATUS "Clang C++ compiler found: ${CLANG_CPP}")
+else()
+    message(STATUS "Clang C++ compiler not found, using default C++ compiler")
+endif()
+
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 set(LIB_DIR "${CMAKE_SOURCE_DIR}/libs")

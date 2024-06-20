@@ -37,7 +37,7 @@ public:
 
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes(sizeof(value), 0);
-    uint32_t tempValue = htonl(value);
+    uint32_t tempValue = value;
     memcpy(bytes.data(), &tempValue, sizeof(value));
     return bytes;
   }
@@ -47,7 +47,6 @@ public:
     }
     value = 0;
     memcpy(&value, bytes.data(), sizeof(value));
-    value = ntohl(value);
     return sizeof(value);
   }
 };

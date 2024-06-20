@@ -73,7 +73,6 @@ void RequestHandler::handleLoginRequest(TcpSocket socket, TCPRequest request,
   try {
     DTO::Login login{0, loginData.userId, loginData.roleId, SString{""}};
     auto user = loginService.login(login);
-    std::cout << "sql done\n";
     ProtocolHeader header;
     header.senderIp = request.protocolHeader.senderIp;
     header.senderPort = request.protocolHeader.senderPort;
@@ -123,6 +122,45 @@ void RequestHandler::handleLoginRequest(TcpSocket socket, TCPRequest request,
   }
 }
 
+void RequestHandler::handleDeleteFoodItemRequest(
+    TcpSocket socket, TCPRequest request, std::vector<unsigned char> payload) {
+  Pair<U64, DTO::FoodItem> foodItemPair;
+  foodItemPair.deserialize(payload);
+  Controller::AdminController adminController;
+  try {
+    adminController.removeFoodItem(foodItemPair.first,
+                                   foodItemPair.second.foodItemId);
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 0;
+    header.payloadSize = 0;
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  } catch (std::exception &e) {
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 400;
+    SString message{std::string(e.what())};
+    std::vector<unsigned char> messageData = message.serialize();
+    header.payloadSize = messageData.size();
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    buffer.insert(buffer.end(), messageData.begin(), messageData.end());
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  }
+}
+
 void RequestHandler::handleGetFoodItemsRequest(
     TcpSocket socket, TCPRequest request, std::vector<unsigned char> payload) {
   UserData userData;
@@ -168,6 +206,44 @@ void RequestHandler::handleAddFoodItemRequest(
   socket.close();
 }
 
+void RequestHandler::handleUpdateFoodItemRequest(
+    TcpSocket socket, TCPRequest request, std::vector<unsigned char> payload) {
+  Pair<U64, DTO::FoodItem> data;
+  data.deserialize(payload);
+  Controller::AdminController adminController;
+  try {
+    adminController.updateFoodItem(data.first, data.second);
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 0;
+    header.payloadSize = 0;
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  } catch (std::exception &e) {
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 400;
+    SString message{std::string(e.what())};
+    std::vector<unsigned char> messageData = message.serialize();
+    header.payloadSize = messageData.size();
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    buffer.insert(buffer.end(), messageData.begin(), messageData.end());
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  }
+}
+
 void RequestHandler::handleRequest(TcpSocket socket, U32 requestId,
                                    TCPRequest request,
                                    std::vector<unsigned char> payload) {
@@ -181,6 +257,12 @@ void RequestHandler::handleRequest(TcpSocket socket, U32 requestId,
     break;
   case 3:
     handleAddFoodItemRequest(std::move(socket), request, payload);
+    break;
+  case 4:
+    handleUpdateFoodItemRequest(std::move(socket), request, payload);
+    break;
+  case 5:
+    handleDeleteFoodItemRequest(std::move(socket), request, payload);
     break;
   default:
     break;

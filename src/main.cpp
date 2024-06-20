@@ -45,13 +45,15 @@ void adminMenu(FoodRecommendationClient &client) {
       break;
     case 2:
       std::cout << "Update Food Item\n";
+      client.updateFoodItem();
       break;
     case 3:
       std::cout << "Delete Food Item\n";
+      client.deleteFoodItem();
       break;
     case 4:
       std::cout << "View Food Items\n";
-      client.getFoodItems();
+      client.showFoodItems();
       break;
     case 6:
       return;
@@ -106,20 +108,5 @@ int main(int argc, char const *argv[]) {
     std::cerr << "Invalid mode\n";
     return -1;
   }
-
-  // initDbConnection();
-  // std::shared_ptr<IUserDAO> userDAO = std::make_shared<UserDAO>();
-  // std::shared_ptr<IMenuDAO> menuDAO = std::make_shared<MenuDAO>();
-  // std::shared_ptr<IFeedbackDAO> feedbackDAO =
-  // std::make_shared<FeedbackDAO>();
-
-  // EmployeeService employeeService(userDAO, menuDAO, feedbackDAO);
-  // auto menu = employeeService.getTodaysMenu();
-  // std::cout << menu.size() << std::endl;
-  // for (auto &menuDTO : menu) {
-  //   std::cout << menuDTO.date << menuDTO.foodItems.size() << std::endl;
-  // }
-  // employeeService.sendFeedback(1, 1, "Good", 5);
-
   return 0;
 }

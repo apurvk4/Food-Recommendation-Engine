@@ -6,6 +6,7 @@
 #include "SerializableTypes/U64.h"
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <string>
 
 namespace DTO {
@@ -17,14 +18,15 @@ struct FoodItem : public Serializable {
   U64 foodItemTypeId;
   SString itemName;
   FoodItem()
-      : foodItemId(0), price(0), availabilityStatus(false), foodItemTypeId(0),
-        itemName("") {}
+      : foodItemId(0), price(0), availabilityStatus(false), foodItemTypeId(0) {}
   ~FoodItem() {}
-  FoodItem(U64 foodItemId, SString itemName, Double price,
-           bool availabilityStatus, U64 foodItemTypeId)
-      : foodItemId(foodItemId), itemName(itemName), price(price),
-        availabilityStatus(availabilityStatus), foodItemTypeId(foodItemTypeId) {
-  }
+
+  FoodItem(U64 foodItemId, Double price, bool availabilityStatus,
+           U64 foodItemTypeId, SString itemName)
+      : foodItemId(foodItemId), price(price),
+        availabilityStatus(availabilityStatus), foodItemTypeId(foodItemTypeId),
+        itemName(itemName) {}
+
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> serialized;
     std::vector<unsigned char> foodItemIdSerialized = foodItemId.serialize();
@@ -38,9 +40,9 @@ struct FoodItem : public Serializable {
         foodItemTypeId.serialize();
     serialized.insert(serialized.end(), foodItemTypeIdSerialized.begin(),
                       foodItemTypeIdSerialized.end());
-    std::vector<unsigned char> itemNameSerialized = itemName.serialize();
-    serialized.insert(serialized.end(), itemNameSerialized.begin(),
-                      itemNameSerialized.end());
+
+    std::vector<unsigned char> itemNameSer = itemName.serialize();
+    serialized.insert(serialized.end(), itemNameSer.begin(), itemNameSer.end());
     return serialized;
   }
 
@@ -55,12 +57,16 @@ struct FoodItem : public Serializable {
     std::vector<unsigned char> foodItemTypeIdData(data.begin() + bytesRead,
                                                   data.end());
     bytesRead += foodItemTypeId.deserialize(foodItemTypeIdData);
-    std::vector<unsigned char> itemNameData(data.begin() + bytesRead,
-                                            data.end());
-    bytesRead += itemName.deserialize(itemNameData);
+    bytesRead += itemName.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
     return bytesRead;
   }
   size_t getSize() override {
+    std::cout << "id : " << foodItemId.getSize() << std::endl;
+    std::cout << "price : " << price.getSize() << std::endl;
+    std::cout << "availability : " << 1 << std::endl;
+    std::cout << "type : " << foodItemTypeId.getSize() << std::endl;
+    std::cout << "name : " << itemName.getSize() << std::endl;
     return foodItemId.getSize() + price.getSize() + 1 +
            foodItemTypeId.getSize() + itemName.getSize();
   }

@@ -38,8 +38,6 @@ Array<DTO::FoodItem> AdminController::getFoodItems(uint64_t adminUserId) {
   auto result = adminService.getFoodItems(adminUserId);
   Array<DTO::FoodItem> resultArray;
   for (auto item : result) {
-    std::cout << "adding item to array : " << (std::string)item.itemName
-              << "\n";
     resultArray.push_back(item);
   }
   return resultArray;

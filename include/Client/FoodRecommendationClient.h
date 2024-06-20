@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FoodItem.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
 #include "User.h"
 #include <cstdint>
@@ -22,12 +23,13 @@ class FoodRecommendationClient {
     result = header.payloadSize.serialize();
     buffer.insert(buffer.end(), result.begin(), result.end());
   }
+  std::vector<DTO::FoodItem> getFoodItems();
 
 public:
   FoodRecommendationClient() : activeUser(nullptr){};
   void loginUser();
   void logout();
-  void getFoodItems();
+  void showFoodItems();
   void addFoodItem();
   void updateFoodItem();
   void deleteFoodItem();

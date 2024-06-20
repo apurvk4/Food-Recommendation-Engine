@@ -4,7 +4,6 @@
 #include "SerializableTypes.h"
 #include "SerializableTypes/Serializable.h"
 
-#pragma pack(1)
 struct ProtocolHeader {
   U32 senderIp;
   U16 senderPort;
@@ -71,5 +70,3 @@ struct loginData : public Serializable {
     return userId.getSize() + password.getSize() + roleId.getSize();
   }
 };
-
-#pragma pop()

@@ -8,6 +8,7 @@
 #include <cppconn/statement.h>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 using ::DAO::FoodItemDAO;
 using ::DTO::FoodItem;
@@ -64,8 +65,8 @@ FoodItem FoodItemDAO::getFoodItemById(uint64_t foodItemId) {
     double price = foodItemResult->getDouble("price");
     bool availabilityStatus = foodItemResult->getBoolean("availabilityStatus");
     uint64_t foodItemTypeId = foodItemResult->getUInt64("foodItemTypeId");
-    return FoodItem(foodItemId, itemName, price, availabilityStatus,
-                    foodItemTypeId);
+    return FoodItem(foodItemId, price, availabilityStatus, foodItemTypeId,
+                    itemName);
   }
   throw std::invalid_argument("No Food items with Id : " +
                               std::to_string(foodItemId));
@@ -88,8 +89,8 @@ std::vector<FoodItem> FoodItemDAO::getFoodItemsByPrice(double minPrice,
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
     uint64_t foodItemType = foodItemsResult->getUInt64("foodItemTypeId");
-    foodItems.emplace_back(foodItemId, itemName, price, availabilityStatus,
-                           foodItemType);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, foodItemType,
+                           itemName);
   }
   return foodItems;
 }
@@ -108,8 +109,8 @@ std::vector<FoodItem> FoodItemDAO::getAvailableFoodItems() {
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
     uint64_t foodItemType = foodItemsResult->getUInt64("foodItemTypeId");
-    foodItems.emplace_back(foodItemId, itemName, price, availabilityStatus,
-                           foodItemType);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, foodItemType,
+                           itemName);
   }
   return foodItems;
 }
@@ -126,8 +127,8 @@ std::vector<FoodItem> FoodItemDAO::getAllFoodItems() {
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
     uint64_t foodItemTypeId = foodItemsResult->getUInt64("foodItemTypeId");
-    foodItems.emplace_back(foodItemId, itemName, price, availabilityStatus,
-                           foodItemTypeId);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus,
+                           foodItemTypeId, itemName);
   }
   std::cout << "Returning foodItems\n";
   return foodItems;
@@ -148,8 +149,8 @@ FoodItemDAO::getFoodItemsByType(FoodItemType foodItemType) {
     std::string itemName = foodItemsResult->getString("itemName");
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
-    foodItems.emplace_back(foodItemId, itemName, price, availabilityStatus,
-                           foodItemType.foodItemTypeId);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus,
+                           foodItemType.foodItemTypeId, itemName);
   }
   return foodItems;
 }

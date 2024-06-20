@@ -28,6 +28,10 @@ class RequestHandler {
                      std::vector<unsigned char> payload);
   void handleAddFoodItemRequest(TcpSocket socket, TCPRequest request,
                                 std::vector<unsigned char> payload);
+  void handleUpdateFoodItemRequest(TcpSocket socket, TCPRequest request,
+                                   std::vector<unsigned char> payload);
+  void handleDeleteFoodItemRequest(TcpSocket socket, TCPRequest request,
+                                   std::vector<unsigned char> payload);
 
 public:
   RequestHandler(){};
