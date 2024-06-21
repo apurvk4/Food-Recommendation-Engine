@@ -49,13 +49,10 @@ std::vector<DTO::FoodItem> AdminService::getFoodItems(uint64_t adminUserId) {
   if (adminUser.roleId != (U64)1) {
     throw std::runtime_error("Only admin can update food item");
   }
-  std::cout << "admin verified \n";
   if (foodItemDAO != nullptr) {
     auto result = foodItemDAO->getAllFoodItems();
-    std::cout << "found alll food Items\n";
     return result;
   } else {
-    std::cout << "foodItem DAO is null\n";
     throw std::runtime_error("foodItemDAO is null");
   }
 }

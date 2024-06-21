@@ -67,7 +67,7 @@ void adminMenu(FoodRecommendationClient &client) {
 void chefMenu(FoodRecommendationClient &clients) {
   do {
     std::cout << "1. View Food Item Recommendations\n";
-    std::cout << "3. Logout\n";
+    std::cout << "2. Logout\n";
     int choice;
     std::cin >> choice;
     switch (choice) {
@@ -75,7 +75,7 @@ void chefMenu(FoodRecommendationClient &clients) {
       std::cout << "View Food Item Recommendations\n";
       clients.showFoodItemRecommendation();
       break;
-    case 3:
+    case 2:
       return;
     default:
       std::cerr << "Invalid choice\n";

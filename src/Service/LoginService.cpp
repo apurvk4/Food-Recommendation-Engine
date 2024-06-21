@@ -10,9 +10,6 @@ LoginService::LoginService(std::shared_ptr<DAO::IUserDAO> userDAO,
 
 DTO::User LoginService::login(DTO::Login login) {
   std::cout << "login service\n";
-  std::cout << login.loginId << "\n";
-  std::cout << login.userId << "\n";
-  std::cout << login.roleId << "\n";
   try {
     bool result = loginDAO->login(login);
     if (result) {

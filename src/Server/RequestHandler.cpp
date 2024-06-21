@@ -30,7 +30,6 @@ RequestHandler::parseHeaders(std::vector<unsigned char> &data) {
   request.protocolHeader.receiverPort = parser.getReceiverPort();
   request.protocolHeader.requestId = parser.getRequestId();
   request.protocolHeader.payloadSize = parser.getPayloadSize();
-  std::cout << "parsed headers\n";
   return std::make_pair(request, parser.getPayload());
 }
 

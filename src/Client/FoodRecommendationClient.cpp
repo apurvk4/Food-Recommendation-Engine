@@ -200,9 +200,7 @@ std::vector<DTO::FoodItem> FoodRecommendationClient::getFoodItems() {
   ProtocolParser parser{data};
   uint32_t reqId = parser.getRequestId();
   if (reqId == 0) {
-    std::cout << "Food Items\n";
     std::vector<unsigned char> payload = parser.getPayload();
-    std::cout << " received payload size : " << payload.size() << "\n";
     Array<DTO::FoodItem> foodItems;
     foodItems.deserialize(payload);
     std::vector<DTO::FoodItem> foodItems1;
