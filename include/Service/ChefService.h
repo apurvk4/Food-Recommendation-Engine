@@ -2,11 +2,11 @@
 
 #include "DTO/Role.h"
 #include "FoodItem.h"
-#include "IFeedbackDAO.h"
 #include "IFoodItemDAO.h"
 #include "IMenuDAO.h"
 #include "IMenuItemDAO.h"
 #include "IPreferenceDAO.h"
+#include "IReviewDAO.h"
 #include "IScheduledMenuDAO.h"
 #include "MenuType.h"
 #include "Preference.h"
@@ -15,13 +15,14 @@
 #include <string>
 #include <vector>
 
+
 namespace Service {
 
-using DAO::IFeedbackDAO;
 using DAO::IFoodItemDAO;
 using DAO::IMenuDAO;
 using DAO::IMenuItemDAO;
 using DAO::IPreferenceDAO;
+using DAO::IReviewDAO;
 using DAO::IRoleDAO;
 using DAO::IScheduledMenuDAO;
 using DAO::IUserDAO;
@@ -47,7 +48,7 @@ class ChefService : public UserService {
   std::shared_ptr<IMenuDAO> menuDAO;
   std::shared_ptr<IFoodItemDAO> foodItemDAO;
   std::shared_ptr<IMenuItemDAO> menuItemDAO;
-  std::shared_ptr<IFeedbackDAO> feedbackDAO;
+  std::shared_ptr<IReviewDAO> ReviewDAO;
   std::shared_ptr<IPreferenceDAO> preferenceDAO;
 
 public:
@@ -59,7 +60,7 @@ public:
               std::shared_ptr<IMenuDAO> menuDAO,
               std::shared_ptr<IFoodItemDAO> foodItemDAO,
               std::shared_ptr<IMenuItemDAO> menuItemDAO,
-              std::shared_ptr<IFeedbackDAO> feedbackDAO,
+              std::shared_ptr<IReviewDAO> ReviewDAO,
               std::shared_ptr<IPreferenceDAO> preferenceDAO);
   bool createSurveyMenu(uint64_t chefUserId, Menu menu,
                         std::vector<MenuItem> foodItems);

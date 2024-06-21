@@ -88,16 +88,12 @@ ALTER TABLE
 
 CREATE TABLE `Review`(
     `reviewId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `menuId` BIGINT UNSIGNED NULL REFERENCES `Menu`(`menuId`) ON DELETE SET NULL,
     `userId` BIGINT UNSIGNED NULL REFERENCES `User`(`userId`) ON DELETE SET NULL,
     `foodItemId` BIGINT UNSIGNED NOT NULL REFERENCES `FoodItem`(`foodItemId`) ON DELETE CASCADE,
     `rating` INT NOT NULL,
     `comment` TEXT NOT NULL,
     `date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-ALTER TABLE
-    `Review` ADD INDEX `reviews_menuid_index`(`menuId`);
 
 ALTER TABLE
     `Review` ADD INDEX `reviews_userid_index`(`userId`);
@@ -113,20 +109,7 @@ CREATE TABLE `Feedback`(
     `preference` BOOLEAN NOT NULL
 );
 
-CREATE TABLE `Session` (
-    `sessionId` VARCHAR(255) PRIMARY KEY,
-    `userId` BIGINT UNSIGNED NOT NULL REFERENCES `User`(`userId`) ON DELETE CASCADE,
-    `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `validTill` DATETIME NOT NULL
-);
 
-CREATE TABLE `UserLastNotification` (
-    `userId` BIGINT UNSIGNED NOT NULL,
-    `lastNotificationId` BIGINT UNSIGNED NULL,
-    PRIMARY KEY (`userId`),
-    FOREIGN KEY (`userId`) REFERENCES `User`(`userId`) ON DELETE CASCADE,
-    FOREIGN KEY (`lastNotificationId`) REFERENCES `Notification`(`notificationId`)
-);
 
 DELIMITER $$
 
@@ -160,8 +143,8 @@ CREATE TRIGGER trg_remove_null_feedback
 AFTER UPDATE ON Review
 FOR EACH ROW
 BEGIN
-    IF NEW.userId IS NULL AND NEW.menuId IS NULL THEN
-        DELETE FROM Review WHERE userId IS NULL AND menuId IS NULL;
+    IF NEW.userId IS NULL AND NEW.foodItemId IS NULL THEN
+        DELETE FROM Review WHERE userId IS NULL AND foodItemId IS NULL;
     END IF;
 END $$
 
@@ -243,3 +226,25 @@ INSERT INTO `FoodItem`(`itemName`, `price`, `availabilityStatus`, `foodItemTypeI
 ('Paneer Tikka', 130.00, 1, 3), -- Dinner
 ('Fish Curry', 160.00, 1, 3), -- Dinner
 ('Gulab Jamun', 50.00, 1, 3); -- Dinner
+
+INSERT INTO `Review` (`userId`, `foodItemId`, `rating`, `comment`, `date`) VALUES
+(1, 1, 5, 'Excellent taste and texture!', '2024-06-15 08:30:00'),
+(2, 2, 4, 'Crispy and delicious, could use a bit more filling.', '2024-06-15 09:00:00'),
+(3, 3, 3, 'Tasty but a bit too oily.', '2024-06-15 09:30:00'),
+(1, 4, 4, 'Light and flavorful.', '2024-06-15 10:00:00'),
+(1, 5, 5, 'Perfectly cooked and very tasty.', '2024-06-15 10:30:00'),
+(2, 6, 4, 'Rich and creamy, but a bit too spicy.', '2024-06-15 11:00:00'),
+(2, 7, 5, 'Absolutely loved the spices!', '2024-06-15 11:30:00'),
+(2, 8, 3, 'Good, but the vegetables could be fresher.', '2024-06-15 12:00:00'),
+(2, 9, 4, 'Simple and comforting.', '2024-06-15 12:30:00'),
+(2, 10, 5, 'Perfect balance of flavors.', '2024-06-15 13:00:00'),
+(2, 11, 4, 'Creamy and delicious.', '2024-06-15 13:30:00'),
+(3, 12, 5, 'Crispy and spicy, just right.', '2024-06-15 14:00:00'),
+(3, 13, 3, 'Too much potato, not enough spices.', '2024-06-15 14:30:00'),
+(1, 14, 4, 'Crunchy and flavorful.', '2024-06-15 15:00:00'),
+(2, 15, 5, 'Perfectly cooked and seasoned.', '2024-06-15 15:30:00'),
+(3, 16, 4, 'Tender and full of flavor.', '2024-06-15 16:00:00'),
+(1, 17, 5, 'The spices are just right, very tasty.', '2024-06-15 16:30:00'),
+(2, 18, 3, 'Too greasy for my taste.', '2024-06-15 17:00:00'),
+(3, 19, 4, 'Great texture and flavor.', '2024-06-15 17:30:00'),
+(1, 20, 5, 'Perfect sweetness, loved it!', '2024-06-15 18:00:00');

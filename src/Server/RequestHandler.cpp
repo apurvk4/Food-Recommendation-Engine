@@ -1,5 +1,6 @@
 #include "Server/RequestHandler.h"
 #include "AdminController.h"
+#include "ChefController.h"
 #include "ChefService.h"
 #include "DAO/ILoginDAO.h"
 #include "DAO/INotificationDAO.h"
@@ -244,6 +245,48 @@ void RequestHandler::handleUpdateFoodItemRequest(
   }
 }
 
+void RequestHandler::handleFoodItemRecommendationRequest(
+    TcpSocket socket, TCPRequest request, std::vector<unsigned char> payload) {
+  try {
+    Pair<U64, DTO::FoodItemType> data;
+    data.deserialize(payload);
+    ChefController chefController;
+    auto foodItems = chefController.getRecommendationFoodItems(
+        data.first, data.second, (uint32_t)5);
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 0;
+    header.payloadSize = foodItems.getSize();
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    auto foodItemSerialized = foodItems.serialize();
+    buffer.insert(buffer.end(), foodItemSerialized.begin(),
+                  foodItemSerialized.end());
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  } catch (std::exception &e) {
+    ProtocolHeader header;
+    header.senderIp = request.protocolHeader.senderIp;
+    header.senderPort = request.protocolHeader.senderPort;
+    header.receiverIp = request.protocolHeader.receiverIp;
+    header.receiverPort = request.protocolHeader.receiverPort;
+    header.requestId = 400;
+    SString message{std::string(e.what())};
+    std::vector<unsigned char> messageData = message.serialize();
+    header.payloadSize = messageData.size();
+    std::vector<unsigned char> buffer;
+    writeProtocolHeader(buffer, header);
+    buffer.insert(buffer.end(), messageData.begin(), messageData.end());
+    socket.sendData(buffer);
+    socket.shutdown(SHUTDOWN_BOTH);
+    socket.close();
+  }
+}
+
 void RequestHandler::handleRequest(TcpSocket socket, U32 requestId,
                                    TCPRequest request,
                                    std::vector<unsigned char> payload) {
@@ -263,6 +306,9 @@ void RequestHandler::handleRequest(TcpSocket socket, U32 requestId,
     break;
   case 5:
     handleDeleteFoodItemRequest(std::move(socket), request, payload);
+    break;
+  case 6:
+    handleFoodItemRecommendationRequest(std::move(socket), request, payload);
     break;
   default:
     break;

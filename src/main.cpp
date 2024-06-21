@@ -1,8 +1,8 @@
 #include "Client/FoodRecommendationClient.h"
 #include "DAO/INotificationDAO.h"
 #include "DAO/NotificationDAO.h"
+#include "DAO/ReviewDAO.h"
 #include "EmployeeService.h"
-#include "FeedbackDAO.h"
 #include "MenuDAO.h"
 #include "RoleDAO.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
@@ -64,6 +64,26 @@ void adminMenu(FoodRecommendationClient &client) {
   } while (true);
 }
 
+void chefMenu(FoodRecommendationClient &clients) {
+  do {
+    std::cout << "1. View Food Item Recommendations\n";
+    std::cout << "3. Logout\n";
+    int choice;
+    std::cin >> choice;
+    switch (choice) {
+    case 1:
+      std::cout << "View Food Item Recommendations\n";
+      clients.showFoodItemRecommendation();
+      break;
+    case 3:
+      return;
+    default:
+      std::cerr << "Invalid choice\n";
+      break;
+    }
+  } while (true);
+}
+
 void client() {
   FoodRecommendationClient client;
   while (true) {
@@ -76,6 +96,7 @@ void client() {
       std::cout << "Employee\n";
     } else if (currentRole == 3) {
       std::cout << "Chef\n";
+      chefMenu(client);
     } else {
       std::cerr << "Invalid role\n";
       return;

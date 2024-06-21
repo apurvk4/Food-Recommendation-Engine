@@ -12,7 +12,7 @@ struct FoodItemType : public Serializable {
   SString foodItemType;
   FoodItemType(U64 foodItemTypeId, SString foodItemType)
       : foodItemTypeId(foodItemTypeId), foodItemType(foodItemType) {}
-
+  FoodItemType() : foodItemTypeId(0), foodItemType("") {}
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> serialized;
     std::vector<unsigned char> foodItemTypeIdSerialized =

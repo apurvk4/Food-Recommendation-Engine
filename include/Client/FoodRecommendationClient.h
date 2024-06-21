@@ -24,6 +24,7 @@ class FoodRecommendationClient {
     buffer.insert(buffer.end(), result.begin(), result.end());
   }
   std::vector<DTO::FoodItem> getFoodItems();
+  std::vector<DTO::FoodItem> getRecommendedFoodItems();
 
 public:
   FoodRecommendationClient() : activeUser(nullptr){};
@@ -34,4 +35,5 @@ public:
   void updateFoodItem();
   void deleteFoodItem();
   int getCurrentRole();
+  void showFoodItemRecommendation();
 };

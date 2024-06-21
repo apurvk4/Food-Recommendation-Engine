@@ -18,12 +18,12 @@ ChefService::ChefService(std::shared_ptr<IUserDAO> userDAO,
                          std::shared_ptr<IMenuDAO> menuDAO,
                          std::shared_ptr<IFoodItemDAO> foodItemDAO,
                          std::shared_ptr<IMenuItemDAO> menuItemDAO,
-                         std::shared_ptr<IFeedbackDAO> feedbackDAO,
+                         std::shared_ptr<IReviewDAO> ReviewDAO,
                          std::shared_ptr<IPreferenceDAO> preferenceDAO)
     : UserService(userDAO, roleDAO, notificationDAO),
       scheduledMenuDAO(scheduledMenuDAO), menuDAO(menuDAO),
-      foodItemDAO(foodItemDAO), menuItemDAO(menuItemDAO),
-      feedbackDAO(feedbackDAO), preferenceDAO(preferenceDAO) {}
+      foodItemDAO(foodItemDAO), menuItemDAO(menuItemDAO), ReviewDAO(ReviewDAO),
+      preferenceDAO(preferenceDAO) {}
 
 bool ChefService::createSurveyMenu(uint64_t chefUserId, Menu menu,
                                    std::vector<MenuItem> menuItems) {

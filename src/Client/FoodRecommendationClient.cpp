@@ -1,6 +1,7 @@
 #include "Client/FoodRecommendationClient.h"
 #include "Client/TcpClient.h"
 #include "FoodItem.h"
+#include "FoodItemType.h"
 #include "SerializableTypes/Pair.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
 #include "SerializableTypes/ProtocolParser.h"
@@ -402,4 +403,80 @@ int FoodRecommendationClient::getCurrentRole() {
     return -1;
   }
   return activeUser->roleId;
+}
+
+void FoodRecommendationClient::showFoodItemRecommendation() {
+  if (activeUser == nullptr) {
+    std::cerr << "Please login first\n";
+    return;
+  }
+  TcpClient client("127.0.0.1", 1234);
+  if (!client.connectToServer()) {
+    std::cerr << "Failed to connect to server\n";
+    return;
+  }
+  int localPort = client.getLocalPort();
+  std::cout << "localPort : " << localPort << "\n";
+  TCPRequest request;
+  std::string ip{"127.0.0.1"};
+  request.protocolHeader.senderIp = Socket::convertIpAddress(ip).s_addr;
+  request.protocolHeader.senderPort = localPort;
+  request.protocolHeader.receiverIp = Socket::convertIpAddress(ip).s_addr;
+  request.protocolHeader.receiverPort = 1234;
+  request.protocolHeader.requestId = 6;
+  Pair<U64, DTO::FoodItemType> foodItemTypePair;
+  foodItemTypePair.first = activeUser->userId;
+  foodItemTypePair.second = DTO::FoodItemType(0, std::string(""));
+  int choice = 0;
+  std::cout << "\nPress 1 for Breakfast\n2 for Lunch\n3 for Dinner\n";
+  std::cin >> choice;
+  switch (choice) {
+  case 1:
+    foodItemTypePair.second.foodItemTypeId = 1;
+    foodItemTypePair.second.foodItemType = "Breakfast";
+    break;
+  case 2:
+    foodItemTypePair.second.foodItemTypeId = 2;
+    foodItemTypePair.second.foodItemType = "Lunch";
+    break;
+  case 3:
+    foodItemTypePair.second.foodItemTypeId = 3;
+    foodItemTypePair.second.foodItemType = "Dinner";
+    break;
+  default:
+    std::cerr << "Invalid choice\n";
+    return;
+  }
+  request.protocolHeader.payloadSize = foodItemTypePair.getSize();
+  std::vector<unsigned char> requestBuffer;
+  writeProtocolHeader(requestBuffer, request.protocolHeader);
+  auto foodItemTypeBuffer = foodItemTypePair.serialize();
+  requestBuffer.insert(requestBuffer.end(), foodItemTypeBuffer.begin(),
+                       foodItemTypeBuffer.end());
+  client.sendData(requestBuffer);
+  std::vector<unsigned char> data = client.receiveData();
+  ProtocolParser parser{data};
+  uint32_t reqId = parser.getRequestId();
+  if (reqId == 0) {
+    std::cout << "Recommended Food Items\n";
+    std::vector<unsigned char> payload = parser.getPayload();
+    Array<DTO::FoodItem> foodItems;
+    foodItems.deserialize(payload);
+    for (int i = 0; i < foodItems.NumberOfItems(); i++) {
+      std::cout << "------------------------------\n";
+      std::cout << "Food Item Id : " << foodItems[i].foodItemId << "\n";
+      std::cout << "Food Item Name : " << (std::string)foodItems[i].itemName
+                << "\n";
+      std::cout << "Price : " << foodItems[i].price << "\n";
+      std::cout << "Availability : " << foodItems[i].availabilityStatus << "\n";
+      std::cout << "Food Item Type Id : " << foodItems[i].foodItemTypeId
+                << "\n";
+      std::cout << "------------------------------\n";
+    }
+  } else {
+    std::cout << "Failed to get recommended food items\n";
+    SString message;
+    message.deserialize(parser.getPayload());
+    std::cout << "Error : " << (std::string)message << std::endl;
+  }
 }

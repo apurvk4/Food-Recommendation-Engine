@@ -1,5 +1,5 @@
 #include "Service/EmployeeService.h"
-#include "DTO/Feedback.h"
+#include "DTO/Review.h"
 #include "DTO/ScheduledMenu.h"
 #include "Service/UserService.h"
 #include <chrono>
@@ -37,12 +37,12 @@ EmployeeService::EmployeeService(
     std::shared_ptr<IMenuDAO> menuDAO,
     std::shared_ptr<IFoodItemDAO> foodItemDAO,
     std::shared_ptr<IMenuItemDAO> menuItemDAO,
-    std::shared_ptr<IFeedbackDAO> feedbackDAO,
+    std::shared_ptr<IReviewDAO> ReviewDAO,
     std::shared_ptr<IPreferenceDAO> preferenceDAO)
     : UserService(userDAO, roleDAO, notificationDAO),
       scheduledMenuDAO(scheduledMenuDAO), menuDAO(menuDAO),
-      foodItemDAO(foodItemDAO), menuItemDAO(menuItemDAO),
-      feedbackDAO(feedbackDAO), preferenceDAO(preferenceDAO) {}
+      foodItemDAO(foodItemDAO), menuItemDAO(menuItemDAO), ReviewDAO(ReviewDAO),
+      preferenceDAO(preferenceDAO) {}
 
 std::pair<DTO::Menu, std::vector<DTO::FoodItem>>
 EmployeeService::getTodaysMenu(uint64_t userId, uint64_t menuType) {
@@ -86,9 +86,9 @@ EmployeeService::getTodaysMenu(uint64_t userId, uint64_t menuType) {
   return std::make_pair(menu, foodItems);
 }
 
-bool EmployeeService::sendFeedback(uint64_t foodItemId, uint64_t menuId,
-                                   uint64_t userId, std::string comment,
-                                   int rating) {
+bool EmployeeService::sendReview(uint64_t foodItemId, uint64_t menuId,
+                                 uint64_t userId, std::string comment,
+                                 int rating) {
   Role role = getRole(userId);
   if (roleDAO->getRoleId("Employee") != role.roleId) {
     throw std::runtime_error("User does not have permission to view menu");
@@ -100,8 +100,8 @@ bool EmployeeService::sendFeedback(uint64_t foodItemId, uint64_t menuId,
   std::ostringstream oss;
   oss << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S");
   auto date = oss.str();
-  DTO::Feedback feedback(0, userId, menuId, foodItemId, rating, comment, date);
-  return feedbackDAO->addFeedback(feedback);
+  DTO::Review Review(0, userId, foodItemId, rating, comment, date);
+  return ReviewDAO->addReview(Review);
 }
 
 std::pair<DTO::ScheduledMenu, std::vector<DTO::FoodItem>>
