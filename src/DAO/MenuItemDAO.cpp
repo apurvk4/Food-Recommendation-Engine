@@ -15,21 +15,21 @@ bool MenuItemDAO::addMenuItem(uint64_t foodItemId, uint64_t menuId,
                               uint32_t quantity) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> addMenuItemStatement(
-      connection->prepareStatement("INSERT INTO menuItems (foodItemId, menuId, "
+      connection->prepareStatement("INSERT INTO MenuItem (foodItemId, menuId, "
                                    "quantity) VALUES (?, ?, ?)"));
   addMenuItemStatement->setUInt64(1, foodItemId);
   addMenuItemStatement->setUInt64(2, menuId);
   addMenuItemStatement->setUInt(3, quantity);
-  return addMenuItemStatement->execute();
+  return addMenuItemStatement->executeUpdate();
 }
 
 bool MenuItemDAO::deleteMenuItem(uint64_t menuItemId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> deleteMenuItemStatement(
       connection->prepareStatement(
-          "DELETE FROM menuItems WHERE menuItemId = ?"));
+          "DELETE FROM MenuItem WHERE menuItemId = ?"));
   deleteMenuItemStatement->setUInt64(1, menuItemId);
-  return deleteMenuItemStatement->execute();
+  return deleteMenuItemStatement->executeUpdate();
 }
 
 bool MenuItemDAO::updateMenuItemQuantity(uint64_t menuItemId,
@@ -37,16 +37,16 @@ bool MenuItemDAO::updateMenuItemQuantity(uint64_t menuItemId,
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> updateMenuItemStatement(
       connection->prepareStatement(
-          "UPDATE menuItems SET quantity = ? WHERE menuItemId = ?"));
+          "UPDATE MenuItem SET quantity = ? WHERE menuItemId = ?"));
   updateMenuItemStatement->setUInt(1, quantity);
-  return updateMenuItemStatement->execute();
+  return updateMenuItemStatement->executeUpdate();
 }
 
 DTO::MenuItem MenuItemDAO::getMenuItemById(uint64_t menuItemId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> getMenuItemStatement(
       connection->prepareStatement(
-          "SELECT * FROM menuItems WHERE menuItemId = ?"));
+          "SELECT * FROM MenuItem WHERE menuItemId = ?"));
   getMenuItemStatement->setUInt64(1, menuItemId);
   std::unique_ptr<sql::ResultSet> menuItemResult(
       getMenuItemStatement->executeQuery());
@@ -60,7 +60,7 @@ DTO::MenuItem MenuItemDAO::getMenuItemById(uint64_t menuItemId) {
 std::vector<DTO::MenuItem> MenuItemDAO::getMenuItemByMenuId(uint64_t menuId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> getMenuItemStatement(
-      connection->prepareStatement("SELECT * FROM menuItems WHERE menuId = ?"));
+      connection->prepareStatement("SELECT * FROM MenuItem WHERE menuId = ?"));
   getMenuItemStatement->setUInt64(1, menuId);
   std::unique_ptr<sql::ResultSet> menuItemResult(
       getMenuItemStatement->executeQuery());
@@ -73,4 +73,12 @@ std::vector<DTO::MenuItem> MenuItemDAO::getMenuItemByMenuId(uint64_t menuId) {
     menuItems.emplace_back(menuItemId, foodItemId, menuId, quantity);
   }
   return menuItems;
+}
+
+bool MenuItemDAO::deleteMenuItemByMenuId(uint64_t menuId) {
+  std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
+  std::unique_ptr<sql::PreparedStatement> deleteMenuItemStatement(
+      connection->prepareStatement("DELETE FROM MenuItem WHERE menuId = ?"));
+  deleteMenuItemStatement->setUInt64(1, menuId);
+  return deleteMenuItemStatement->executeUpdate();
 }

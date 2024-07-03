@@ -51,6 +51,7 @@ bool TcpSocket::isConnected() {
 void TcpSocket::close() {
   if (socket > 0) {
     ::shutdown(socket, SHUTDOWN_BOTH);
+    ::close(socket);
   }
 }
 
@@ -73,9 +74,15 @@ std::vector<unsigned char> TcpSocket::receiveData() {
 
 void TcpSocket::sendData(std::vector<unsigned char> &dataToSend) {
   int bytesSend = 0;
-  bytesSend = ::send(socket, (char *)dataToSend.data(), dataToSend.size(), 0);
-  std::cout << "bytesSend : " << bytesSend << std::endl;
-  if (bytesSend == SOCKET_ERROR) {
+  int totalBytesSend = 0;
+  do {
+    bytesSend = ::send(socket, (char *)dataToSend.data() + totalBytesSend,
+                       dataToSend.size() - totalBytesSend, 0);
+    if (bytesSend > 0) {
+      totalBytesSend += bytesSend;
+    }
+  } while (bytesSend > 0);
+  if (totalBytesSend != dataToSend.size()) {
     throw SocketException("Failed to send Data to remote ", socket,
                           ErrorStatus::E_TcpSendError);
   }

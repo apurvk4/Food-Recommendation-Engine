@@ -1,5 +1,7 @@
 #include "SerializableTypes/ProtocolParser.h"
+#include "SerializableTypes/ProtocolDefinitions.h"
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 
 ProtocolParser::ProtocolParser(const std::vector<unsigned char> &buffer)
@@ -49,6 +51,22 @@ U16 ProtocolParser::getReceiverPort() {
   return parsedHeader.receiverPort;
 }
 
+U64 ProtocolParser::getUserId() {
+  if (!protocolHeaderParsed) {
+    parsedHeader = parseHeader();
+    protocolHeaderParsed = true;
+  }
+  return parsedHeader.userId;
+}
+
+U64 ProtocolParser::getRoleId() {
+  if (!protocolHeaderParsed) {
+    parsedHeader = parseHeader();
+    protocolHeaderParsed = true;
+  }
+  return parsedHeader.roleId;
+}
+
 U64 ProtocolParser::getPayloadSize() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
@@ -65,13 +83,21 @@ U32 ProtocolParser::getRequestId() {
   return parsedHeader.requestId;
 }
 
+std::string ProtocolParser::getEndpoint() {
+  if (!protocolHeaderParsed) {
+    parsedHeader = parseHeader();
+    protocolHeaderParsed = true;
+  }
+  std::cout << "request endpoint : "
+            << std::string(parsedHeader.endpoint, MAX_ENDPOINT_SIZE) << "\n";
+  return std::string(parsedHeader.endpoint, MAX_ENDPOINT_SIZE);
+}
+
 std::vector<unsigned char> ProtocolParser::getPayload() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
     protocolHeaderParsed = true;
   }
-  // total payload size
-  std::cout << "payload size: " << parsedHeader.payloadSize << "\n";
   return safeSubVector(buffer, protocolHeaderBytesRead, buffer.size());
 }
 
@@ -90,6 +116,17 @@ ProtocolHeader ProtocolParser::parseHeader() {
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
   bytesRead += header.payloadSize.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint64_t)));
-  protocolHeaderBytesRead = bytesRead;
+  bytesRead += header.userId.deserialize(
+      safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint64_t)));
+  bytesRead += header.roleId.deserialize(
+      safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint64_t)));
+
+  std::vector<unsigned char> endpointData =
+      safeSubVector(buffer, bytesRead, bytesRead + MAX_ENDPOINT_SIZE);
+  if (endpointData.size() < MAX_ENDPOINT_SIZE) {
+    throw std::out_of_range("Insufficient data for endpoint in header");
+  }
+  std::memcpy(header.endpoint, endpointData.data(), MAX_ENDPOINT_SIZE);
+  protocolHeaderBytesRead = bytesRead + MAX_ENDPOINT_SIZE;
   return header;
 }

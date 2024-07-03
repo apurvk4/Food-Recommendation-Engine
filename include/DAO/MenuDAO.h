@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Category.h"
 #include "DAO/IMenuDAO.h"
 #include "DTO/Menu.h"
 #include "DTO/MenuItem.h"
@@ -21,7 +22,12 @@ public:
   DTO::Menu getMenu(uint64_t menuId) override;
   std::vector<DTO::Menu> getAllMenus() override;
   uint64_t getMenuType(uint64_t menuId) override;
-  std::vector<DTO::Menu> getMenusByType(uint64_t type) override;
+  std::vector<DTO::Menu> getMenusByType(DTO::Category category) override;
+  std::vector<DTO::Menu> getMenuByDate(std::string date) override;
+  std::vector<DTO::Menu> getMenuByCategory(DTO::Category category) override;
+  std::vector<DTO::Menu> getSurveyMenu(std::string date) override;
+  std::vector<DTO::Menu> getSurveyMenu(std::string date,
+                                       DTO::Category category) override;
 };
 
 }; // namespace DAO

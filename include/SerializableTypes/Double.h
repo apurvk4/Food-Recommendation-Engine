@@ -41,10 +41,10 @@ public:
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes;
     uint64_t tempValue = 0;
-    memcpy(&tempValue, &value, sizeof(double));
+    memcpy(&tempValue, &value, sizeof(value));
     tempValue = tempValue;
     bytes.insert(bytes.end(), (unsigned char *)&tempValue,
-                 (unsigned char *)&tempValue + sizeof(double));
+                 (unsigned char *)&tempValue + sizeof(value));
     return bytes;
   }
   uint64_t deserialize(const std::vector<unsigned char> &bytes) override {
@@ -53,7 +53,6 @@ public:
     }
     value = 0;
     memcpy(&value, bytes.data(), sizeof(value));
-    uint64_t *tempValue = (uint64_t *)&value;
     return sizeof(value);
   }
 };

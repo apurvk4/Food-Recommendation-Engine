@@ -18,7 +18,6 @@ bool TcpClient::connectToServer() {
     std::cerr << "Socket creation error" << std::endl;
     return false;
   }
-
   if (inet_pton(AF_INET, serverIp_.c_str(), &serv_addr_.sin_addr) <= 0) {
     std::cerr << "Invalid address/ Address not supported" << std::endl;
     return false;

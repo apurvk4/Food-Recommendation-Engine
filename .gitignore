@@ -33,4 +33,3 @@
 build/
 bin/
 .vscode/
-cmake/

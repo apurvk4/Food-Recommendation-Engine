@@ -4,6 +4,8 @@
 #include "SerializableTypes.h"
 #include "SerializableTypes/Serializable.h"
 
+#define MAX_ENDPOINT_SIZE 30
+
 struct ProtocolHeader {
   U32 senderIp;
   U16 senderPort;
@@ -11,6 +13,9 @@ struct ProtocolHeader {
   U16 receiverPort;
   U32 requestId;
   U64 payloadSize;
+  U64 userId;
+  U64 roleId;
+  char endpoint[MAX_ENDPOINT_SIZE]; // max size 30 characters
 };
 
 struct TCPRequest {
@@ -40,7 +45,7 @@ struct UserData : public Serializable {
   size_t getSize() override { return userId.getSize(); }
 };
 
-struct loginData : public Serializable {
+struct LoginData : public Serializable {
   U64 userId;
   U64 roleId;
   SString password;
@@ -70,3 +75,9 @@ struct loginData : public Serializable {
     return userId.getSize() + password.getSize() + roleId.getSize();
   }
 };
+
+void writeProtocolHeader(std::vector<unsigned char> &buffer,
+                         ProtocolHeader &header);
+
+void writeResponse(std::vector<unsigned char> &buffer, TCPRequest &response,
+                   U32 responseCode, std::vector<unsigned char> &payload);

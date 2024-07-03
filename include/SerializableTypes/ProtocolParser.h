@@ -22,5 +22,8 @@ public:
   U16 getReceiverPort();
   U32 getRequestId();
   U64 getPayloadSize();
+  U64 getUserId();
+  U64 getRoleId();
+  std::string getEndpoint();
   std::vector<unsigned char> getPayload();
 };

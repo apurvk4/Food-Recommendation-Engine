@@ -13,6 +13,7 @@ struct User {
   SString password;
   U64 roleId;
   U64 lastNotificationId;
+  User() = default;
   User(U64 userId, SString name, SString password, U64 roleId,
        U64 lastNotificationId)
       : userId(userId), name(name), password(password), roleId(roleId),
@@ -39,23 +40,23 @@ struct User {
     return serialized;
   }
   uint64_t deserialize(const std::vector<unsigned char> &data) {
-    std::vector<unsigned char> userIdData(data.begin(), data.begin() + 8);
-    uint64_t bytesRead = userId.deserialize(userIdData);
-    std::vector<unsigned char> nameData(data.begin() + bytesRead,
-                                        data.begin() + bytesRead + 32);
-    bytesRead += name.deserialize(nameData);
-    std::vector<unsigned char> passwordData(data.begin() + bytesRead,
-                                            data.begin() + bytesRead + 32);
-    bytesRead += password.deserialize(passwordData);
-    std::vector<unsigned char> roleIdData(data.begin() + bytesRead,
-                                          data.begin() + bytesRead + 8);
-    bytesRead += roleId.deserialize(roleIdData);
-    std::vector<unsigned char> lastNotificationIdData(
-        data.begin() + bytesRead, data.begin() + bytesRead + 8);
-    bytesRead += lastNotificationId.deserialize(lastNotificationIdData);
+    uint64_t bytesRead = 0;
+    bytesRead += userId.deserialize(
+        std::vector<unsigned char>(data.begin(), data.end()));
+    bytesRead += name.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
+    bytesRead += password.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
+    bytesRead += roleId.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
+    bytesRead += lastNotificationId.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
     return bytesRead;
   }
-  size_t getSize() { return 88; }
+  size_t getSize() {
+    return userId.getSize() + name.getSize() + password.getSize() +
+           roleId.getSize() + lastNotificationId.getSize();
+  }
 };
 
 }; // namespace DTO

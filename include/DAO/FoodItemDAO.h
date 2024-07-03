@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Category.h"
 #include "DAO/IFoodItemDAO.h"
 #include "DbConnection.h"
 #include <memory>
@@ -19,7 +20,7 @@ public:
                                                  double maxPrice) override;
   std::vector<DTO::FoodItem> getAvailableFoodItems() override;
   std::vector<DTO::FoodItem>
-  getFoodItemsByType(DTO::FoodItemType foodItemType) override;
+  getFoodItemsByType(DTO::Category foodItemType) override;
   std::vector<DTO::FoodItem> getAllFoodItems() override;
 };
 

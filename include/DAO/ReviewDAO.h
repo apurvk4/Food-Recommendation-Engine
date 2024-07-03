@@ -16,7 +16,6 @@ public:
   ReviewDAO();
   bool addReview(Review) override;
   Review getReviewById(uint64_t ReviewId) override;
-  std::vector<Review> getReviewsByMenuId(uint64_t menuId) override;
   std::vector<Review> getReviewsByUserId(uint64_t userId) override;
   std::vector<Review> getReviewsByFoodItemId(uint64_t foodItemId) override;
   std::vector<Review> getAllReviews() override;

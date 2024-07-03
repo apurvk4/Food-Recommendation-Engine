@@ -15,14 +15,13 @@ bool ReviewDAO::addReview(Review Review) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> addReviewStatement(
       connection->prepareStatement("INSERT INTO Review (userId, "
-                                   "menuId,foodItemId, rating, comment, date) "
-                                   "VALUES (?, ?,?, ?, ?, ?)"));
+                                   "foodItemId, rating, comment) "
+                                   "VALUES (?, ?,?, ?)"));
   addReviewStatement->setUInt64(1, Review.userId);
-  addReviewStatement->setUInt64(3, Review.foodItemId);
-  addReviewStatement->setInt(4, Review.rating);
-  addReviewStatement->setString(5, (std::string)Review.comment);
-  addReviewStatement->setString(6, (std::string)Review.date);
-  return addReviewStatement->execute();
+  addReviewStatement->setUInt64(2, Review.foodItemId);
+  addReviewStatement->setInt(3, Review.rating);
+  addReviewStatement->setString(4, (std::string)Review.comment);
+  return addReviewStatement->executeUpdate();
 }
 
 Review ReviewDAO::getReviewById(uint64_t ReviewId) {
@@ -35,7 +34,6 @@ Review ReviewDAO::getReviewById(uint64_t ReviewId) {
   if (ReviewResult->next()) {
     ReviewId = ReviewResult->getUInt64("ReviewId");
     uint64_t userId = ReviewResult->getUInt64("userId");
-    uint64_t menuId = ReviewResult->getUInt64("menuId");
     uint64_t foodItemId = ReviewResult->getUInt64("foodItemId");
     uint32_t rating = ReviewResult->getUInt("rating");
     SString comment = (std::string)ReviewResult->getString("comment");
@@ -45,27 +43,6 @@ Review ReviewDAO::getReviewById(uint64_t ReviewId) {
   throw std::invalid_argument("Invalid ReviewId, cannot find Review with given "
                               "ReviewId : " +
                               std::to_string(ReviewId));
-}
-
-std::vector<Review> ReviewDAO::getReviewsByMenuId(uint64_t menuId) {
-  std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
-  std::unique_ptr<sql::PreparedStatement> getReviewStatement(
-      connection->prepareStatement("SELECT * FROM Review WHERE menuId = ?"));
-  getReviewStatement->setUInt64(1, menuId);
-  std::unique_ptr<sql::ResultSet> ReviewResult(
-      getReviewStatement->executeQuery());
-  std::vector<Review> Reviews;
-  while (ReviewResult->next()) {
-    uint64_t ReviewId = ReviewResult->getUInt64("ReviewId");
-    uint64_t userId = ReviewResult->getUInt64("userId");
-    uint64_t menuId = ReviewResult->getUInt64("menuId");
-    uint64_t foodItemId = ReviewResult->getUInt64("foodItemId");
-    int rating = ReviewResult->getInt("rating");
-    SString comment = (std::string)ReviewResult->getString("comment");
-    SString date = (std::string)ReviewResult->getString("date");
-    Reviews.emplace_back(ReviewId, userId, foodItemId, rating, comment, date);
-  }
-  return Reviews;
 }
 
 std::vector<Review> ReviewDAO::getReviewsByUserId(uint64_t userId) {
@@ -79,7 +56,6 @@ std::vector<Review> ReviewDAO::getReviewsByUserId(uint64_t userId) {
   while (ReviewResult->next()) {
     uint64_t ReviewId = ReviewResult->getUInt64("ReviewId");
     userId = ReviewResult->getUInt64("userId");
-    uint64_t menuId = ReviewResult->getUInt64("menuId");
     uint64_t foodItemId = ReviewResult->getUInt64("foodItemId");
     int rating = ReviewResult->getInt("rating");
     SString comment = (std::string)ReviewResult->getString("comment");
@@ -119,7 +95,6 @@ std::vector<Review> ReviewDAO::getAllReviews() {
   while (ReviewResult->next()) {
     uint64_t ReviewId = ReviewResult->getUInt64("ReviewId");
     uint64_t userId = ReviewResult->getUInt64("userId");
-    uint64_t menuId = ReviewResult->getUInt64("menuId");
     uint64_t foodItemId = ReviewResult->getUInt64("foodItemId");
     int rating = ReviewResult->getInt("rating");
     SString comment = (std::string)ReviewResult->getString("comment");

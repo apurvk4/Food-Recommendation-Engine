@@ -43,10 +43,12 @@ template <typename T> T TcpSocket::receive() {
   do {
     bytesReceived = ::recv(socket, (char *)&dataToReceive + totalBytesReceived,
                            sizeof(dataToReceive) - totalBytesReceived, 0);
-    totalBytesReceived += bytesReceived;
-  } while (bytesReceived != -1);
+    if (bytesReceived > 0) {
+      totalBytesReceived += bytesReceived;
+    }
+  } while (bytesReceived > 0);
 
-  if (bytesReceived != sizeof(dataToReceive)) {
+  if (totalBytesReceived != sizeof(dataToReceive)) {
     throw SocketException(
         std::string("Failed to read the required data from socket, Read : ") +
             std::to_string(bytesReceived) + " bytes Needed :" +
@@ -62,8 +64,10 @@ template <typename T> void TcpSocket::send(T &dataToSend) {
   do {
     bytesSend = ::send(socket, (char *)&dataToSend + totalBytesSend,
                        sizeof(dataToSend) - totalBytesSend, 0);
-    totalBytesSend += bytesSend;
-  } while (bytesSend != -1);
+    if (bytesSend > 0) {
+      totalBytesSend += bytesSend;
+    }
+  } while (bytesSend > 0);
 
   if (totalBytesSend == SOCKET_ERROR) {
     throw SocketException("Failed to send Data to remote ", socket,

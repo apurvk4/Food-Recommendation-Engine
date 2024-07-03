@@ -12,35 +12,35 @@ using DTO::Notification;
 NotificationDAO::NotificationDAO()
     : dbConnection{DbConnection::getInstance()} {}
 
-bool NotificationDAO::sendNotification(Notification notification) {
+bool NotificationDAO::addNotification(Notification notification) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
-      "INSERT INTO Notifications (message) VALUES (?)"));
+      "INSERT INTO Notification (message) VALUES (?)"));
   prepStmt->setString(1, (std::string)notification.message);
-  return prepStmt->execute();
+  return prepStmt->executeUpdate();
 }
 
 bool NotificationDAO::deleteNotification(uint64_t notificationId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
-      "DELETE FROM Notifications WHERE notificationId = ?"));
+      "DELETE FROM Notification WHERE notificationId = ?"));
   prepStmt->setUInt64(1, notificationId);
-  return prepStmt->execute();
+  return prepStmt->executeUpdate();
 }
 
 bool NotificationDAO::updateNotification(Notification notification) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
-      "UPDATE Notifications SET message = ? WHERE notificationId = ?"));
+      "UPDATE Notification SET message = ? WHERE notificationId = ?"));
   prepStmt->setString(1, (std::string)notification.message);
   prepStmt->setUInt64(2, notification.notificationId);
-  return prepStmt->execute();
+  return prepStmt->executeUpdate();
 }
 
 Notification NotificationDAO::getNotification(uint64_t notificationId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
-      "SELECT * FROM Notifications WHERE notificationId = ?"));
+      "SELECT * FROM Notification WHERE notificationId = ?"));
   prepStmt->setUInt64(1, notificationId);
   std::shared_ptr<sql::ResultSet> notificationResult(prepStmt->executeQuery());
   if (notificationResult->next()) {
@@ -58,7 +58,7 @@ NotificationDAO::getAllNotificationsAfter(uint64_t notificationId) {
   std::vector<Notification> notifications;
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::shared_ptr<sql::PreparedStatement> prepStmt(connection->prepareStatement(
-      "SELECT * FROM Notifications WHERE notificationId > ?"));
+      "SELECT * FROM Notification WHERE notificationId > ?"));
   prepStmt->setUInt64(1, notificationId);
   std::shared_ptr<sql::ResultSet> notificationResult(prepStmt->executeQuery());
   while (notificationResult->next()) {

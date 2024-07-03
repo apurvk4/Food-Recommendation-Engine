@@ -43,7 +43,6 @@ User UserDAO::getUserById(int userId) {
     uint64_t roleId = resultSet->getUInt64("roleId");
     std::string password = resultSet->getString("password");
     uint64_t lastNotificationId = resultSet->getUInt64("lastNotificationId");
-    std::cout << "User found\n";
     return User(userId, userName, password, roleId, lastNotificationId);
   }
   std::cout << "User Not found\n";
@@ -60,18 +59,19 @@ bool UserDAO::addUser(User user) {
   preparedStatement->setString(1, (std::string)user.name);
   preparedStatement->setInt(2, user.roleId);
   preparedStatement->setString(3, (std::string)user.password);
-  return preparedStatement->execute();
+  return preparedStatement->executeUpdate();
 }
 
 bool UserDAO::updateUser(User user) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> preparedStatement(
       connection->prepareStatement("UPDATE User SET name = ?, roleId = ?, "
-                                   "lastNotificatioId = ? WHERE userId = ?"));
+                                   "lastNotificationId = ? WHERE userId = ?"));
   preparedStatement->setString(1, (std::string)user.name);
   preparedStatement->setInt(2, user.roleId);
   preparedStatement->setInt(3, user.lastNotificationId);
-  return preparedStatement->execute();
+  preparedStatement->setInt(4, user.userId);
+  return preparedStatement->executeUpdate();
 }
 
 bool UserDAO::deleteUser(int id) {
@@ -79,7 +79,7 @@ bool UserDAO::deleteUser(int id) {
   std::unique_ptr<sql::PreparedStatement> preparedStatement(
       connection->prepareStatement("DELETE FROM User WHERE userId = ?"));
   preparedStatement->setInt(1, id);
-  return preparedStatement->execute();
+  return preparedStatement->executeUpdate();
 }
 
 bool UserDAO::changePassword(int id, std::string newPassword) {
@@ -89,7 +89,7 @@ bool UserDAO::changePassword(int id, std::string newPassword) {
           "UPDATE User SET password = ? WHERE userId = ?"));
   preparedStatement->setString(1, newPassword);
   preparedStatement->setInt(2, id);
-  return preparedStatement->execute();
+  return preparedStatement->executeUpdate();
 }
 
 uint64_t UserDAO::getLastNotificationId(int userId) {

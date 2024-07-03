@@ -45,9 +45,13 @@ public:
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes;
     U64 size = value.size();
+
     auto sizeSer = size.serialize();
     bytes.insert(bytes.end(), sizeSer.begin(), sizeSer.end());
-    bytes.insert(bytes.end(), value.begin(), value.end());
+    if (value.size() > 0) {
+      bytes.insert(bytes.end(), value.begin(), value.end());
+    }
+
     return bytes;
   }
 
@@ -58,18 +62,21 @@ public:
     }
     U64 size = 0;
     uint64_t bytesRead = size.deserialize(bytes);
-    if (bytes.size() < sizeof(uint64_t) + size) {
-      throw std::runtime_error("Not enough bytes to deserialize SString");
+    if ((uint64_t)size == 0) {
+      value = "";
+      return bytesRead;
+    }
+    if (bytes.size() < bytesRead + size) {
+      throw std::runtime_error(
+          "Not enough bytes to deserialize SString, required " +
+          std::to_string(bytesRead + size) + " but got " +
+          std::to_string(bytes.size()));
     }
 
-    value = std::string(bytes.begin() + sizeof(uint64_t),
-                        bytes.begin() + sizeof(uint64_t) + size);
+    value = std::string(bytes.begin() + bytesRead,
+                        bytes.begin() + bytesRead + size);
     bytesRead += value.size();
     return bytesRead;
   }
-  size_t getSize() override {
-    std::cout << "size : " << value.size() << "\n";
-    std::cout << "sizeof(uint64_t) : 8" << "\n";
-    return 8 + value.size();
-  }
+  size_t getSize() override { return 8 + value.size(); }
 };

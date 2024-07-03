@@ -12,6 +12,7 @@ struct Notification : public Serializable {
   U64 notificationId;
   SString message;
   SString date;
+  Notification() : notificationId(0), message(""), date("") {}
   Notification(U64 notificationId, SString message, SString date)
       : notificationId(notificationId), message(message), date(date) {}
 
@@ -30,16 +31,19 @@ struct Notification : public Serializable {
     return serialized;
   }
   uint64_t deserialize(const std::vector<unsigned char> &data) override {
-    std::vector<unsigned char> notificationIdData(data.begin(),
-                                                  data.begin() + 8);
-    notificationId.deserialize(notificationIdData);
-    std::vector<unsigned char> messageData(data.begin() + 8, data.begin() + 40);
-    message.deserialize(messageData);
-    std::vector<unsigned char> dateData(data.begin() + 40, data.begin() + 72);
-    date.deserialize(dateData);
-    return 72;
+    uint64_t bytesRead = 0;
+    notificationId.deserialize(
+        std::vector<unsigned char>(data.begin(), data.begin() + 8));
+    bytesRead += 8;
+    bytesRead += message.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
+    bytesRead += date.deserialize(
+        std::vector<unsigned char>(data.begin() + bytesRead, data.end()));
+    return bytesRead;
   }
-  size_t getSize() override { return 72; }
+  size_t getSize() override {
+    return notificationId.getSize() + message.getSize() + date.getSize();
+  }
 };
 
 }; // namespace DTO

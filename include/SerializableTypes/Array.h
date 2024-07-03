@@ -36,13 +36,13 @@ public:
       std::vector<unsigned char> elementBytes = element.serialize();
       bytes.insert(bytes.end(), elementBytes.begin(), elementBytes.end());
     }
-    std::cout << "Serialized array size : " << bytes.size() << std::endl;
+
     return bytes;
   }
   uint64_t deserialize(const std::vector<unsigned char> &bytes) override {
     value.clear();
     U64 size = (U64)0;
-    std::cout << "received payload size : " << bytes.size() << std::endl;
+
     uint64_t bytesRead = size.deserialize(bytes);
     for (uint64_t i = 0; i < size; i++) {
       T element;

@@ -12,7 +12,7 @@ class NotificationDAO : public INotificationDAO {
 
 public:
   NotificationDAO();
-  bool sendNotification(Notification notification) override;
+  bool addNotification(Notification notification) override;
   Notification getNotification(uint64_t notificationId) override;
   bool deleteNotification(uint64_t notificationId) override;
   bool updateNotification(Notification notification) override;

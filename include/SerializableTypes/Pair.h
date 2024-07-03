@@ -2,6 +2,7 @@
 
 #include "SerializableTypes/SString.h"
 #include "SerializableTypes/Serializable.h"
+#include <cstddef>
 
 template <typename T>
 using is_serializable_t =
@@ -24,16 +25,18 @@ public:
                       firstSerialized.end());
     serialized.insert(serialized.end(), secondSerialized.begin(),
                       secondSerialized.end());
+
     return serialized;
   }
   uint64_t deserialize(const std::vector<unsigned char> &data) override {
-    std::vector<unsigned char> firstData(data.begin(),
-                                         data.begin() + first.getSize());
-    first.deserialize(firstData);
-    std::vector<unsigned char> secondData(data.begin() + first.getSize(),
-                                          data.end());
-    second.deserialize(secondData);
-    return first.getSize() + second.getSize();
+    size_t bytesRead = 0;
+    std::vector<unsigned char> firstData(data.begin(), data.end());
+    bytesRead += first.deserialize(firstData);
+
+    std::vector<unsigned char> secondData(data.begin() + bytesRead, data.end());
+    bytesRead += second.deserialize(secondData);
+
+    return bytesRead;
   }
   size_t getSize() override { return first.getSize() + second.getSize(); }
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Category.h"
 #include "DTO/FoodItem.h"
 #include <cstdint>
 #include <vector>
@@ -16,7 +17,7 @@ public:
                                                          double maxPrice) = 0;
   virtual std::vector<DTO::FoodItem> getAvailableFoodItems() = 0;
   virtual std::vector<DTO::FoodItem>
-  getFoodItemsByType(DTO::FoodItemType foodItemType) = 0;
+  getFoodItemsByType(DTO::Category foodItemType) = 0;
   virtual std::vector<DTO::FoodItem> getAllFoodItems() = 0;
   ~IFoodItemDAO() = default;
 };

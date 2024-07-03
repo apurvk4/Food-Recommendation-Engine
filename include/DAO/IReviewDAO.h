@@ -9,7 +9,6 @@ class IReviewDAO {
 public:
   virtual bool addReview(DTO::Review) = 0;
   virtual DTO::Review getReviewById(uint64_t ReviewId) = 0;
-  virtual std::vector<DTO::Review> getReviewsByMenuId(uint64_t menuId) = 0;
   virtual std::vector<DTO::Review> getReviewsByUserId(uint64_t userId) = 0;
   virtual std::vector<DTO::Review>
   getReviewsByFoodItemId(uint64_t foodItemId) = 0;

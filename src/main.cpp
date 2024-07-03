@@ -1,18 +1,34 @@
-#include "Client/FoodRecommendationClient.h"
-#include "DAO/INotificationDAO.h"
-#include "DAO/NotificationDAO.h"
+#include "Client/ClientApplication.h"
+#include "Client/UserHandler.h"
+#include "Controller/AdminController.h"
+#include "Controller/AuthController.h"
+#include "Controller/ChefController.h"
+#include "Controller/EmployeeController.h"
+#include "DAO/FeedbackDAO.h"
+#include "DAO/MenuItemDAO.h"
 #include "DAO/ReviewDAO.h"
-#include "EmployeeService.h"
+#include "DAO/UserActivityDAO.h"
+#include "DbConnection.h"
+#include "FoodItemAttribute.h"
+#include "FoodItemDAO.h"
+#include "FoodItemService.h"
+#include "IFeedbackDAO.h"
+#include "IMenuItemDAO.h"
+#include "IReviewDAO.h"
+#include "IUserDAO.h"
 #include "MenuDAO.h"
-#include "RoleDAO.h"
-#include "SerializableTypes/ProtocolDefinitions.h"
-#include "SerializableTypes/Serializable.h"
-#include "SerializableTypes/U64.h"
+#include "MenuService.h"
+#include "Middleware/AuthMiddleware.h"
+#include "Middleware/IMiddleware.h"
+#include "NotificationDAO.h"
+#include "RecommendationService.h"
+#include "Role.h"
 #include "Server/FoodRecommendationServer.h"
 #include "Server/RequestHandler.h"
-#include "Sockets/SocketUtils.h"
-#include "Sockets/TcpSocket.h"
+#include "Server/RouteHandler.h"
+#include "UserFoodPreferenceDAO.h"
 #include "UserService.h"
+#include <memory>
 
 void initDbConnection() {
   DbConnection::initDbConnection("tcp://localhost:3306", "cppserver",
@@ -21,95 +37,77 @@ void initDbConnection() {
 
 void server() {
   initDbConnection();
-  Server::RequestHandler handler;
+  std::shared_ptr<DAO::IUserDAO> userDAO = std::make_shared<DAO::UserDAO>();
+  std::shared_ptr<DAO::IUserActivityDAO> userActivityDAO =
+      std::make_shared<DAO::UserActivityDAO>();
+  std::shared_ptr<DAO::INotificationDAO> notificationDAO =
+      std::make_shared<DAO::NotificationDAO>();
+  std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO =
+      std::make_shared<DAO::FoodItemDAO>();
+  std::shared_ptr<DAO::IMenuDAO> menuDAO = std::make_shared<DAO::MenuDAO>();
+  std::shared_ptr<DAO::IMenuItemDAO> menuItemDAO =
+      std::make_shared<DAO::MenuItemDAO>();
+  std::shared_ptr<DAO::IFeedbackDAO> feedbackDAO =
+      std::make_shared<DAO::FeedbackDAO>();
+  std::shared_ptr<DAO::IReviewDAO> reviewDAO =
+      std::make_shared<DAO::ReviewDAO>();
+  std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO =
+      std::make_shared<DAO::FoodItemAttribute>();
+  std::shared_ptr<DAO::IUserFoodPreferenceDAO> userFoodPreferenceDAO =
+      std::make_shared<DAO::UserFoodPreferenceDAO>();
+  std::shared_ptr<Service::UserService> userService =
+      std::make_shared<Service::UserService>(
+          userDAO, userActivityDAO, notificationDAO, userFoodPreferenceDAO);
+  std::shared_ptr<Service::FoodItemService> foodItemService =
+      std::make_shared<Service::FoodItemService>(
+          foodItemDAO, feedbackDAO, reviewDAO, foodItemAttributeDAO);
+  std::shared_ptr<Service::MenuService> menuService =
+      std::make_shared<Service::MenuService>(menuDAO, foodItemDAO, menuItemDAO);
+  std::shared_ptr<Service::RecommendationService> recommendationService =
+      std::make_shared<Service::RecommendationService>(reviewDAO, foodItemDAO);
+  std::shared_ptr<Middleware::IMiddleware> employeeeAuthMiddleware =
+      std::make_shared<Middleware::AuthMiddleware>(
+          userService, (uint64_t)DTO::Role::Employee);
+  std::shared_ptr<Middleware::IMiddleware> chefAuthMiddleware =
+      std::make_shared<Middleware::AuthMiddleware>(userService,
+                                                   (uint64_t)DTO::Role::Chef);
+  std::shared_ptr<Middleware::IMiddleware> adminAuthMiddleware =
+      std::make_shared<Middleware::AuthMiddleware>(userService,
+                                                   (uint64_t)DTO::Role::Admin);
+  std::shared_ptr<IController> authController =
+      std::make_shared<Controller::AuthController>("/Auth", userService);
+  std::shared_ptr<IController> employeeController =
+      std::make_shared<Controller::EmployeeController>(
+          "/Employee", userService, foodItemService, menuService,
+          recommendationService);
+  employeeController->registerPreprocessorMiddleware(employeeeAuthMiddleware);
+  std::shared_ptr<IController> chefController =
+      std::make_shared<Controller::ChefController>("/Chef", userService,
+                                                   foodItemService, menuService,
+                                                   recommendationService);
+  chefController->registerPreprocessorMiddleware(chefAuthMiddleware);
+  std::shared_ptr<IController> adminController =
+      std::make_shared<Controller::AdminController>("/Admin", userService,
+                                                    foodItemService);
+  adminController->registerPreprocessorMiddleware(adminAuthMiddleware);
+  RouteHandler routehandler;
+  routehandler.registerController(authController);
+  routehandler.registerController(employeeController);
+  routehandler.registerController(chefController);
+  routehandler.registerController(adminController);
+  Server::RequestHandler handler{routehandler};
   std::cout << "Starting server s\n";
   Server::FoodRecommendationServer server{handler, 5};
-  std::string ip{"127.0.0.1"};
-  std::cout << "Server started at " << ip << ":1234\n";
-  server.start(Socket::convertIpAddress(ip), 1234);
-}
-
-void adminMenu(FoodRecommendationClient &client) {
-  do {
-    std::cout << "1. Add Food Item\n";
-    std::cout << "2. Update Food Item\n";
-    std::cout << "3. Delete Food Item\n";
-    std::cout << "4. View Food Items\n";
-    std::cout << "6. Logout\n";
-    int choice;
-    std::cin >> choice;
-    switch (choice) {
-    case 1:
-      client.addFoodItem();
-      std::cout << "Add Food Item\n";
-      break;
-    case 2:
-      std::cout << "Update Food Item\n";
-      client.updateFoodItem();
-      break;
-    case 3:
-      std::cout << "Delete Food Item\n";
-      client.deleteFoodItem();
-      break;
-    case 4:
-      std::cout << "View Food Items\n";
-      client.showFoodItems();
-      break;
-    case 6:
-      return;
-    default:
-      std::cerr << "Invalid choice\n";
-      break;
-    }
-  } while (true);
-}
-
-void chefMenu(FoodRecommendationClient &clients) {
-  do {
-    std::cout << "1. View Food Item Recommendations\n";
-    std::cout << "2. Logout\n";
-    int choice;
-    std::cin >> choice;
-    switch (choice) {
-    case 1:
-      std::cout << "View Food Item Recommendations\n";
-      clients.showFoodItemRecommendation();
-      break;
-    case 2:
-      return;
-    default:
-      std::cerr << "Invalid choice\n";
-      break;
-    }
-  } while (true);
+  std::string ip{SERVER_IP};
+  uint16_t serverPort = SERVER_PORT;
+  std::cout << "Server started at " << ip << ":" << serverPort << "\n";
+  server.start(Socket::convertIpAddress(ip), serverPort);
 }
 
 void client() {
-  FoodRecommendationClient client;
-  while (true) {
-    client.loginUser();
-    int currentRole = client.getCurrentRole();
-    if (currentRole == 1) {
-      std::cout << "Admin\n";
-      adminMenu(client);
-    } else if (currentRole == 2) {
-      std::cout << "Employee\n";
-    } else if (currentRole == 3) {
-      std::cout << "Chef\n";
-      chefMenu(client);
-    } else {
-      std::cerr << "Invalid role\n";
-      return;
-    }
-    std::cout << "press q to quit";
-    char c;
-    std::cin >> c;
-    if (c == 'q') {
-      break;
-    }
-  }
-  int choice = 0;
-  client.getCurrentRole();
+  std::cout << "Starting client\n";
+  ClientApplication app;
+  app.run();
 }
 
 int main(int argc, char const *argv[]) {

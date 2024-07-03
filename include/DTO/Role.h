@@ -8,30 +8,31 @@
 
 namespace DTO {
 
-struct Role : public Serializable {
-  U64 roleId;
-  SString roleName;
-  Role(U64 roleId, SString roleName) : roleId(roleId), roleName(roleName) {}
+enum class Role : uint64_t { Admin = 1, Employee = 2, Chef = 3 };
 
-  std::vector<unsigned char> serialize() override {
-    std::vector<unsigned char> serialized;
-    std::vector<unsigned char> roleIdSerialized = roleId.serialize();
-    std::vector<unsigned char> roleNameSerialized = roleName.serialize();
-    serialized.insert(serialized.end(), roleIdSerialized.begin(),
-                      roleIdSerialized.end());
-    serialized.insert(serialized.end(), roleNameSerialized.begin(),
-                      roleNameSerialized.end());
-    return serialized;
+inline std::string RoleToString(Role role) {
+  switch (role) {
+  case Role::Admin:
+    return "Admin";
+  case Role::Employee:
+    return "Employee";
+  case Role::Chef:
+    return "Chef";
+  default:
+    throw std::invalid_argument("Invalid role");
   }
-  uint64_t deserialize(const std::vector<unsigned char> &data) override {
-    std::vector<unsigned char> roleIdData(data.begin(), data.begin() + 8);
-    roleId.deserialize(roleIdData);
-    std::vector<unsigned char> roleNameData(data.begin() + 8,
-                                            data.begin() + 40);
-    roleName.deserialize(roleNameData);
-    return 40;
+}
+
+inline Role StringToRole(const std::string &role) {
+  if (role == "Admin") {
+    return Role::Admin;
+  } else if (role == "Employee") {
+    return Role::Employee;
+  } else if (role == "Chef") {
+    return Role::Chef;
+  } else {
+    throw std::invalid_argument("Invalid role");
   }
-  size_t getSize() override { return 40; }
-};
+}
 
 }; // namespace DTO

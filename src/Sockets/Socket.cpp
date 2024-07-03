@@ -1,10 +1,9 @@
 #include "Sockets/Socket.h"
-
-#include "Sockets/Socket.h"
 #include "Sockets/SocketException.h"
 #include "Sockets/SocketUtils.h"
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "FoodItemType.h"
 #include "SerializableTypes/Double.h"
 #include "SerializableTypes/SString.h"
 #include "SerializableTypes/U64.h"
@@ -62,11 +61,6 @@ struct FoodItem : public Serializable {
     return bytesRead;
   }
   size_t getSize() override {
-    std::cout << "id : " << foodItemId.getSize() << std::endl;
-    std::cout << "price : " << price.getSize() << std::endl;
-    std::cout << "availability : " << 1 << std::endl;
-    std::cout << "type : " << foodItemTypeId.getSize() << std::endl;
-    std::cout << "name : " << itemName.getSize() << std::endl;
     return foodItemId.getSize() + price.getSize() + 1 +
            foodItemTypeId.getSize() + itemName.getSize();
   }
