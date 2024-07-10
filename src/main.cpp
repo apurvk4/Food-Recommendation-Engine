@@ -33,8 +33,20 @@
 #include <memory>
 
 void initDbConnection() {
-  DbConnection::initDbConnection("tcp://localhost:3306", "cppserver",
-                                 "cppserver", "FoodRecommendationSystem");
+  std::string userName = std::getenv("MYSQL_USER");
+  std::string password = std::getenv("MYSQL_PASSWORD");
+  std::string host = std::getenv("MYSQL_HOST");
+  std::string port = std::getenv("MYSQL_PORT");
+  std::string dbName = std::getenv("MYSQL_DB");
+
+  if (userName.empty() || password.empty() || host.empty() || port.empty() ||
+      dbName.empty()) {
+    std::cerr << "Environment variables not set\n";
+    exit(1);
+  }
+
+  DbConnection::initDbConnection("tcp://" + host + ":" + port, userName,
+                                 password, dbName);
 }
 
 void server() {
