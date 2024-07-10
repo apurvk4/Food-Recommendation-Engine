@@ -68,8 +68,8 @@ void AdminHandler::addFoodItem() {
       << "Enter availability status (1 for available, 0 for not available): ";
   availabilityStatus = inputHandler.getInput<bool>(
       [](const bool &input) { return input == 0 || input == 1; });
-  DTO::FoodItem foodItem(0, price, availabilityStatus, (uint64_t)category,
-                         itemName);
+  DTO::FoodItem foodItem(0, price, availabilityStatus, false,
+                         (uint64_t)category, itemName);
   std::vector<unsigned char> payload = foodItem.serialize();
   ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
   clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,

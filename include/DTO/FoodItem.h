@@ -14,17 +14,19 @@ struct FoodItem : public Serializable {
   U64 foodItemId;
   Double price;
   bool availabilityStatus;
+  bool isDiscarded;
   U64 foodItemTypeId;
   SString itemName;
   FoodItem()
-      : foodItemId(0), price(0), availabilityStatus(false), foodItemTypeId(0) {}
+      : foodItemId(0), price(0), availabilityStatus(false), foodItemTypeId(0),
+        isDiscarded(false) {}
   ~FoodItem() {}
 
   FoodItem(U64 foodItemId, Double price, bool availabilityStatus,
-           U64 foodItemTypeId, SString itemName)
+           bool isDiscarded, U64 foodItemTypeId, SString itemName)
       : foodItemId(foodItemId), price(price),
         availabilityStatus(availabilityStatus), foodItemTypeId(foodItemTypeId),
-        itemName(itemName) {}
+        itemName(itemName), isDiscarded(isDiscarded) {}
 
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> serialized;
@@ -35,6 +37,7 @@ struct FoodItem : public Serializable {
     serialized.insert(serialized.end(), priceSerialized.begin(),
                       priceSerialized.end());
     serialized.push_back(availabilityStatus);
+    serialized.push_back(isDiscarded);
     std::vector<unsigned char> foodItemTypeIdSerialized =
         foodItemTypeId.serialize();
     serialized.insert(serialized.end(), foodItemTypeIdSerialized.begin(),
@@ -52,6 +55,8 @@ struct FoodItem : public Serializable {
     std::vector<unsigned char> priceData(data.begin() + bytesRead, data.end());
     bytesRead += price.deserialize(priceData);
     availabilityStatus = data[bytesRead];
+    bytesRead += 1;
+    isDiscarded = data[bytesRead];
     bytesRead += 1;
     std::vector<unsigned char> foodItemTypeIdData(data.begin() + bytesRead,
                                                   data.end());

@@ -1,5 +1,6 @@
 #include "Controller/EmployeeController.h"
 #include "Category.h"
+#include "DiscardFeedbackQuestion.h"
 #include "Feedback.h"
 #include "FoodItem.h"
 #include "SerializableTypes/Pair.h"
@@ -77,12 +78,32 @@ EmployeeController::EmployeeController(
               std::vector<unsigned char> &payload) -> bool {
          return this->getFoodPreferences(socket, request, payload);
        }});
+  authRoutes.insert(
+      {"/getDiscardedItem",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->getDiscardedFoodItems(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/getQuestions",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->getDiscardedFoodItemQuestions(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/addAnswer",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->addDiscardedFoodItemAnswer(socket, request, payload);
+       }});
 }
 
 bool EmployeeController::handleRequest(TcpSocket socket, TCPRequest &request,
                                        std::vector<unsigned char> &payload) {
   std::string endpoint = request.protocolHeader.endpoint;
   std::smatch match;
+  // Matches a string starting with a slash, followed by non-slash characters
+  // (group 1), and optionally the rest starting from another slash (group 2)
   std::regex pattern(R"(^(/[^/]+)(/.*)?$)");
   std::shared_ptr<TcpSocket> socketPtr =
       std::make_shared<TcpSocket>(std::move(socket));
@@ -437,4 +458,77 @@ void EmployeeController::sortFoodItems(uint64_t userId,
       [&hasMatchingAttribute](const DTO::FoodItem &a, const DTO::FoodItem &b) {
         return hasMatchingAttribute(a) && !hasMatchingAttribute(b);
       });
+}
+
+bool EmployeeController::getDiscardedFoodItems(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  try {
+    auto foodItems = foodItemService->getDiscardedFoodItems();
+    Array<DTO::FoodItem> responseArray;
+    for (auto &foodItem : foodItems) {
+      responseArray.push_back(foodItem);
+    }
+    std::vector<unsigned char> serialized = responseArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool EmployeeController::getDiscardedFoodItemQuestions(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  U64 foodItemId;
+  std::vector<unsigned char> response;
+  try {
+    foodItemId.deserialize(payload);
+    auto questions = foodItemService->getQuestionByFoodItemId(foodItemId);
+    Array<DTO::DiscardFeedbackQuestion> responseArray;
+    for (auto &question : questions) {
+      responseArray.push_back(question);
+    }
+    std::vector<unsigned char> serialized = responseArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool EmployeeController::addDiscardedFoodItemAnswer(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  DTO::DiscardFeedbackAnswer answer;
+  std::vector<unsigned char> response;
+  try {
+    answer.deserialize(payload);
+    foodItemService->addDiscardFeedbackAnswer(answer.answer, answer.userId,
+                                              answer.questionId);
+    std::vector<unsigned char> serialized = std::vector<unsigned char>();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
 }

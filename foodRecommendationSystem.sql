@@ -17,6 +17,8 @@ CREATE TABLE `FoodItem`(
     `categoryId` BIGINT UNSIGNED NOT NULL REFERENCES `Category`(`categoryId`) ON DELETE CASCADE
 );
 
+ALTER TABLE FoodItem ADD COLUMN isDiscarded TINYINT(1) NOT NULL DEFAULT 0;
+
 CREATE TABLE `Attribute`(
     `attributeId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `attributeName` VARCHAR(255) NOT NULL
@@ -134,8 +136,49 @@ CREATE TABLE `Feedback`(
 ALTER TABLE Feedback
 ADD CONSTRAINT unique_feedback UNIQUE (userId, foodItemId, date);
 
+CREATE TABLE DiscardFeedbackQuestion (
+    questionId BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    foodItemId BIGINT UNSIGNED NOT NULL,
+    question TEXT,
+    FOREIGN KEY (foodItemId) REFERENCES FoodItem(foodItemId)
+);
+
+CREATE TABLE DiscardFeedbackAnswer (
+    answerId BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    questionId BIGINT UNSIGNED NOT NULL,
+    userId BIGINT UNSIGNED NOT NULL,
+    answer TEXT,
+    FOREIGN KEY (questionId) REFERENCES DiscardFeedbackQuestion(questionId) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES User(userId) ON DELETE CASCADE,
+    UNIQUE (questionId, userId)
+);
+
 
 DELIMITER $$
+
+CREATE TRIGGER before_insert_discardFeedbackQuestion
+BEFORE INSERT ON DiscardFeedbackQuestion
+FOR EACH ROW
+BEGIN
+    DECLARE is_discarded BOOLEAN;
+    
+    SELECT isDiscarded INTO is_discarded 
+    FROM FoodItem 
+    WHERE foodItemId = NEW.foodItemId;
+    
+    IF is_discarded = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot insert into DiscardFeedbackQuestion: the food item is not discarded.';
+    END IF;
+END $$
+
+CREATE TRIGGER after_update_foodItem
+AFTER UPDATE ON FoodItem
+FOR EACH ROW
+BEGIN
+    IF NEW.isDiscarded = 0 AND OLD.isDiscarded = 1 THEN
+        DELETE FROM DiscardFeedbackQuestion WHERE foodItemId = NEW.foodItemId;
+    END IF;
+END $$
 
 CREATE TRIGGER trg_add_user_to_last_notification
 AFTER INSERT ON User

@@ -158,3 +158,20 @@ void UserHandler::displayFoodItemPreferences(
   std::cout << "\n...................End of Food Item "
                "Preferences........................\n";
 }
+
+void UserHandler::showFoodItems(const std::vector<DTO::FoodItem> &foodItems) {
+  std::cout << "\n----------------Food Items------------------\n";
+  for (auto &foodItem : foodItems) {
+    std::cout << "\n-----------------\n";
+    std::cout << "Item Id : " << foodItem.foodItemId << "\n";
+    std::cout << "Name: " << (std::string)foodItem.itemName << "\n"
+              << "Category: "
+              << DTO::CategoryToString(
+                     (DTO::Category)(uint64_t)foodItem.foodItemTypeId)
+              << "\n"
+              << "Price: " << foodItem.price << "\n"
+              << "Availability : " << std::boolalpha
+              << foodItem.availabilityStatus << "\n";
+    std::cout << "\n---------------------\n";
+  }
+}

@@ -42,14 +42,16 @@ bool FoodItemDAO::deleteFoodItem(uint64_t foodItemId) {
 bool FoodItemDAO::updateFoodItem(FoodItem foodItem) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> updateFoodItemStatement(
-      connection->prepareStatement("UPDATE FoodItem SET itemName = ?, price = "
-                                   "?, availabilityStatus = ?, categoryId "
-                                   "= ? WHERE foodItemId = ?"));
+      connection->prepareStatement(
+          "UPDATE FoodItem SET itemName = ?, price = "
+          "?, availabilityStatus = ?, categoryId "
+          "= ?, isDiscarded = ? WHERE foodItemId = ?"));
   updateFoodItemStatement->setString(1, (std::string)foodItem.itemName);
   updateFoodItemStatement->setDouble(2, foodItem.price);
   updateFoodItemStatement->setBoolean(3, foodItem.availabilityStatus);
   updateFoodItemStatement->setUInt(4, foodItem.foodItemTypeId);
-  updateFoodItemStatement->setUInt64(5, foodItem.foodItemId);
+  updateFoodItemStatement->setBoolean(5, foodItem.isDiscarded);
+  updateFoodItemStatement->setUInt64(6, foodItem.foodItemId);
   return updateFoodItemStatement->executeUpdate();
 }
 
@@ -66,8 +68,9 @@ FoodItem FoodItemDAO::getFoodItemById(uint64_t foodItemId) {
     double price = foodItemResult->getDouble("price");
     bool availabilityStatus = foodItemResult->getBoolean("availabilityStatus");
     uint64_t foodItemTypeId = foodItemResult->getUInt64("categoryId");
-    return FoodItem(foodItemId, price, availabilityStatus, foodItemTypeId,
-                    itemName);
+    bool isDiscarded = foodItemResult->getBoolean("isDiscarded");
+    return FoodItem(foodItemId, price, availabilityStatus, isDiscarded,
+                    foodItemTypeId, itemName);
   }
   throw std::invalid_argument("No Food items with Id : " +
                               std::to_string(foodItemId));
@@ -89,9 +92,10 @@ std::vector<FoodItem> FoodItemDAO::getFoodItemsByPrice(double minPrice,
     std::string itemName = foodItemsResult->getString("itemName");
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
+    bool isDiscarded = foodItemsResult->getBoolean("isDiscarded");
     uint64_t foodItemType = foodItemsResult->getUInt64("categoryId");
-    foodItems.emplace_back(foodItemId, price, availabilityStatus, foodItemType,
-                           itemName);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, isDiscarded,
+                           foodItemType, itemName);
   }
   return foodItems;
 }
@@ -109,9 +113,10 @@ std::vector<FoodItem> FoodItemDAO::getAvailableFoodItems() {
     std::string itemName = foodItemsResult->getString("itemName");
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
+    bool isDiscarded = foodItemsResult->getBoolean("isDiscarded");
     uint64_t foodItemType = foodItemsResult->getUInt64("categoryId");
-    foodItems.emplace_back(foodItemId, price, availabilityStatus, foodItemType,
-                           itemName);
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, isDiscarded,
+                           foodItemType, itemName);
   }
   return foodItems;
 }
@@ -127,8 +132,9 @@ std::vector<FoodItem> FoodItemDAO::getAllFoodItems() {
     std::string itemName = foodItemsResult->getString("itemName");
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
+    bool isDiscarded = foodItemsResult->getBoolean("isDiscarded");
     uint64_t foodItemTypeId = foodItemsResult->getUInt64("categoryId");
-    foodItems.emplace_back(foodItemId, price, availabilityStatus,
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, isDiscarded,
                            foodItemTypeId, itemName);
   }
   return foodItems;
@@ -148,8 +154,30 @@ std::vector<FoodItem> FoodItemDAO::getFoodItemsByType(Category foodItemType) {
     std::string itemName = foodItemsResult->getString("itemName");
     double price = foodItemsResult->getDouble("price");
     bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
-    foodItems.emplace_back(foodItemId, price, availabilityStatus,
+    bool isDiscarded = foodItemsResult->getBoolean("isDiscarded");
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, isDiscarded,
                            (uint64_t)foodItemType, itemName);
+  }
+  return foodItems;
+}
+
+std::vector<FoodItem> FoodItemDAO::getDiscardedFoodItems() {
+  std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
+  std::unique_ptr<sql::PreparedStatement> getDiscardedFoodItemsStatement(
+      connection->prepareStatement(
+          "SELECT * FROM FoodItem WHERE isDiscarded = 1"));
+  std::unique_ptr<sql::ResultSet> foodItemsResult(
+      getDiscardedFoodItemsStatement->executeQuery());
+  std::vector<FoodItem> foodItems;
+  while (foodItemsResult->next()) {
+    uint64_t foodItemId = foodItemsResult->getUInt64("foodItemId");
+    std::string itemName = foodItemsResult->getString("itemName");
+    double price = foodItemsResult->getDouble("price");
+    bool availabilityStatus = foodItemsResult->getBoolean("availabilityStatus");
+    bool isDiscarded = foodItemsResult->getBoolean("isDiscarded");
+    uint64_t foodItemTypeId = foodItemsResult->getUInt64("categoryId");
+    foodItems.emplace_back(foodItemId, price, availabilityStatus, isDiscarded,
+                           foodItemTypeId, itemName);
   }
   return foodItems;
 }

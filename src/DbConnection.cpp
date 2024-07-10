@@ -24,9 +24,6 @@ void DbConnection::initDbConnection(const std::string &hostName,
   connection = std::shared_ptr<sql::Connection>(
       driver->connect(hostName, userName, password));
   connection->setSchema(schemaName);
-  // connection = std::shared_ptr<sql::Connection>(
-  //     driver->connect("tcp://localhost:3306", "cppserver", "cppserver"));
-  // connection->setSchema("FoodRecommendationSystem");
 }
 
 DbConnection::DbConnection() {}

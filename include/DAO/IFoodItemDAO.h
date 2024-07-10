@@ -19,6 +19,7 @@ public:
   virtual std::vector<DTO::FoodItem>
   getFoodItemsByType(DTO::Category foodItemType) = 0;
   virtual std::vector<DTO::FoodItem> getAllFoodItems() = 0;
+  virtual std::vector<DTO::FoodItem> getDiscardedFoodItems() = 0;
   ~IFoodItemDAO() = default;
 };
 

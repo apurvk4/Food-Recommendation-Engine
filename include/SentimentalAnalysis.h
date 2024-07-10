@@ -16,12 +16,10 @@ public:
 
   bool analyze(const std::string &comment) {
     auto tokens = tokenizer.tokenize(comment);
-    BoWModel model;
-    model.buildModel(tokens);
 
     int sentimentScore = 0;
-    for (const auto &pair : model.getWordCount()) {
-      sentimentScore += pair.second * lexicon.getSentiment(pair.first);
+    for (const auto &token : tokens) {
+      sentimentScore += lexicon.getSentiment(token);
     }
 
     return sentimentScore >= 0;

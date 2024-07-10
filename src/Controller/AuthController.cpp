@@ -30,6 +30,8 @@ bool AuthController::handleRequest(TcpSocket socket, TCPRequest &request,
                                    std::vector<unsigned char> &payload) {
   std::string endpoint = request.protocolHeader.endpoint;
   std::smatch match;
+  // Matches a string starting with a slash, followed by non-slash characters
+  // (group 1), and optionally the rest starting from another slash (group 2)
   std::regex pattern(R"(^(/[^/]+)(/.*)?$)");
   std::shared_ptr<TcpSocket> socketPtr =
       std::make_shared<TcpSocket>(std::move(socket));

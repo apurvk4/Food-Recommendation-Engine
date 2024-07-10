@@ -1,6 +1,8 @@
 #include "Controller/ChefController.h"
 #include "Category.h"
 #include "DTO/VotingResult.h"
+#include "DiscardFeedbackAnswer.h"
+#include "DiscardFeedbackQuestion.h"
 #include "Feedback.h"
 #include "FoodItem.h"
 #include "MenuItem.h"
@@ -51,12 +53,50 @@ ChefController::ChefController(
               std::vector<unsigned char> &payload) -> bool {
          return this->viewNotifications(socket, request, payload);
        }});
+  authRoutes.insert(
+      {"/addDiscardQuestion",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->addDiscardFeedbackQuestion(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/discardFoodItem",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->discardFoodItem(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/viewDiscardAnswer",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->viewDiscardFeedbackAnswers(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/viewDiscardQuestion",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->viewDiscardFeedbackQuestions(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/getFoodItemsBelowRating",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->getFoodItemsBelowRating(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/getDiscardedFoodItems",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->getDiscardedFoodItems(socket, request, payload);
+       }});
 }
 
 bool ChefController::handleRequest(TcpSocket socket, TCPRequest &request,
                                    std::vector<unsigned char> &payload) {
   std::string endpoint = request.protocolHeader.endpoint;
   std::smatch match;
+  // Matches a string starting with a slash, followed by non-slash characters
+  // (group 1), and optionally the rest starting from another slash (group 2)
   std::regex pattern(R"(^(/[^/]+)(/.*)?$)");
   std::shared_ptr<TcpSocket> socketPtr =
       std::make_shared<TcpSocket>(std::move(socket));
@@ -246,6 +286,165 @@ bool ChefController::viewNotifications(std::shared_ptr<TcpSocket> socket,
         userService->getUnreadNotifications(userId);
     Array<DTO::Notification> notificationsArray(notifications);
     auto serialized = notificationsArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::addDiscardFeedbackQuestion(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  Pair<SString, U64> questionFoodItemPair;
+  try {
+    questionFoodItemPair.deserialize(payload);
+    foodItemService->addDiscardFeedbackQuestion(questionFoodItemPair.first,
+                                                questionFoodItemPair.second);
+    auto serialized = std::vector<unsigned char>();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::discardFoodItem(std::shared_ptr<TcpSocket> socket,
+                                     TCPRequest &request,
+                                     std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  U64 foodItemId;
+  try {
+    foodItemId.deserialize(payload);
+    DTO::FoodItem foodItem = foodItemService->getFoodItemById(foodItemId);
+    foodItem.isDiscarded = true;
+    foodItemService->updateFoodItem(foodItem);
+    auto serialized = std::vector<unsigned char>();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::viewDiscardFeedbackAnswers(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  U64 questionId;
+  try {
+    questionId.deserialize(payload);
+    std::vector<DTO::DiscardFeedbackAnswer> answers =
+        foodItemService->getAnswerByQuestionId(questionId);
+    Array<DTO::DiscardFeedbackAnswer> answersArray;
+    for (auto &answer : answers) {
+      answersArray.push_back(answer);
+    }
+    auto serialized = answersArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::viewDiscardFeedbackQuestions(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  U64 foodItemId;
+  try {
+    foodItemId.deserialize(payload);
+    std::vector<DTO::DiscardFeedbackQuestion> questions =
+        foodItemService->getQuestionByFoodItemId(foodItemId);
+    Array<DTO::DiscardFeedbackQuestion> questionsArray;
+    for (auto &question : questions) {
+      questionsArray.push_back(question);
+    }
+    auto serialized = questionsArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::getFoodItemsBelowRating(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  Double rating;
+  try {
+    rating.deserialize(payload);
+    std::vector<DTO::FoodItem> foodItems =
+        recommendationService->getFoodItemsBelowRating(rating);
+    Array<DTO::FoodItem> foodItemsArray;
+    for (auto &foodItem : foodItems) {
+      foodItemsArray.push_back(foodItem);
+    }
+    auto serialized = foodItemsArray.serialize();
+    writeResponse(response, request, 0, serialized);
+    socket->sendData(response);
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    SString error("Error  : " + std::string(e.what()));
+    std::vector<unsigned char> response;
+    auto serialized = error.serialize();
+    writeResponse(response, request, 400, serialized);
+    socket->sendData(response);
+    return false;
+  }
+  return true;
+}
+
+bool ChefController::getDiscardedFoodItems(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> response;
+  try {
+    std::vector<DTO::FoodItem> foodItems =
+        foodItemService->getDiscardedFoodItems();
+    Array<DTO::FoodItem> foodItemsArray;
+    for (auto &foodItem : foodItems) {
+      foodItemsArray.push_back(foodItem);
+    }
+    auto serialized = foodItemsArray.serialize();
     writeResponse(response, request, 0, serialized);
     socket->sendData(response);
   } catch (std::exception &e) {

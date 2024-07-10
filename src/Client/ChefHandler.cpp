@@ -27,12 +27,16 @@ void ChefHandler::performAction() {
               << "4. rollout next menu\n"
               << "5. view Feedback\n"
               << "6. view Notifications\n"
-              << "7. Logout\n"
+              << "7. Get Discarded Food Items\n"
+              << "8. Discard Food Item\n"
+              << "9. Show Discard Feedback Questions\n"
+              << "10. Add Discard Feedback Question\n"
+              << "11. Logout\n"
               << "Enter your choice: ";
     choice = inputHandler.getInput<int>(
-        [](const int &input) { return input >= 1 && input <= 7; });
+        [](const int &input) { return input >= 1 && input <= 11; });
     handleUserSelection(choice);
-  } while (choice != 7);
+  } while (choice != 11);
 }
 
 void ChefHandler::handleUserSelection(int choice) {
@@ -56,6 +60,18 @@ void ChefHandler::handleUserSelection(int choice) {
     viewNotifications("/Chef/viewNotifications");
     break;
   case 7:
+    showFoodItems(getDiscardedFoodItems());
+    break;
+  case 8:
+    discardFoodItem();
+    break;
+  case 9:
+    showDiscardFeedbackQuestions();
+    break;
+  case 10:
+    addDiscardFeedbackQuestion();
+    break;
+  case 11:
     logout();
     break;
   default:
@@ -98,23 +114,6 @@ std::vector<DTO::FoodItem> ChefHandler::getFoodItems() {
   responseString.deserialize(response.second);
   std::runtime_error("Failed to fetch food items, due to : " +
                      (std::string)responseString);
-}
-
-void ChefHandler::showFoodItems(const std::vector<DTO::FoodItem> &foodItems) {
-  std::cout << "\n----------------Food Items------------------\n";
-  for (auto &foodItem : foodItems) {
-    std::cout << "\n-----------------\n";
-    std::cout << "Item Id : " << foodItem.foodItemId << "\n";
-    std::cout << "Name: " << (std::string)foodItem.itemName << "\n"
-              << "Category: "
-              << DTO::CategoryToString(
-                     (DTO::Category)(uint64_t)foodItem.foodItemTypeId)
-              << "\n"
-              << "Price: " << foodItem.price << "\n"
-              << "Availability : " << std::boolalpha
-              << foodItem.availabilityStatus << "\n";
-    std::cout << "\n---------------------\n";
-  }
 }
 
 void ChefHandler::showFoodItemRecommendation() {
@@ -277,6 +276,154 @@ void ChefHandler::viewFeedback() {
     SString responseString;
     responseString.deserialize(response.second);
     std::cout << "Failed to view feedback due to : "
+              << (std::string)responseString << "\n";
+  }
+}
+
+std::vector<DTO::FoodItem> ChefHandler::getFoodItemsBelowRating(double rating) {
+  std::vector<unsigned char> payload;
+  Double ratingValue(rating);
+  payload = ratingValue.serialize();
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Chef/getFoodItemsBelowRating", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    Array<DTO::FoodItem> foodItems;
+    foodItems.deserialize(response.second);
+    std::vector<DTO::FoodItem> foodItemsVector = foodItems;
+    return foodItemsVector;
+  }
+  SString responseString;
+  responseString.deserialize(response.second);
+  std::runtime_error("Failed to fetch food items, due to : " +
+                     (std::string)responseString);
+}
+
+void ChefHandler::showFoodItemsToBeDiscarded() {
+  std::vector<DTO::FoodItem> foodItems = getFoodItemsBelowRating(2.0);
+  showFoodItems(foodItems);
+}
+
+void ChefHandler::discardFoodItem() {
+  std::vector<DTO::FoodItem> foodItems = getFoodItemsBelowRating(2.0);
+  showFoodItems(foodItems);
+  std::pair<uint64_t, uint64_t> itemIdRange = getItemIdRange(foodItems);
+  std::cout << "Enter the item id to discard: ";
+  InputHandler inputHandler;
+  U64 itemId =
+      inputHandler.getInput<uint64_t>([itemIdRange](const uint64_t &input) {
+        return input >= itemIdRange.first && input <= itemIdRange.second;
+      });
+  std::vector<unsigned char> payload = itemId.serialize();
+
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Chef/discardFoodItem", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    std::cout << "Food item discarded successfully\n";
+  } else {
+    SString responseString;
+    responseString.deserialize(response.second);
+    std::cout << "Failed to discard food item due to : "
+              << (std::string)responseString << "\n";
+  }
+}
+
+std::vector<DTO::DiscardFeedbackQuestion>
+ChefHandler::getDiscardFeedbackQuestions(U64 foodItemId) {
+  std::vector<unsigned char> payload = foodItemId.serialize();
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Chef/viewDiscardQuestion", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    Array<DTO::DiscardFeedbackQuestion> discardFeedbackQuestions;
+    discardFeedbackQuestions.deserialize(response.second);
+    std::vector<DTO::DiscardFeedbackQuestion> discardFeedbackQuestionsVector =
+        discardFeedbackQuestions;
+    return discardFeedbackQuestionsVector;
+  }
+  SString responseString;
+  responseString.deserialize(response.second);
+  std::runtime_error("Failed to fetch discard feedback questions, due to : " +
+                     (std::string)responseString);
+}
+
+std::vector<DTO::FoodItem> ChefHandler::getDiscardedFoodItems() {
+  std::vector<unsigned char> payload;
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Chef/getDiscardedFoodItems", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    Array<DTO::FoodItem> foodItems;
+    foodItems.deserialize(response.second);
+    std::vector<DTO::FoodItem> foodItemsVector = foodItems;
+    return foodItemsVector;
+  }
+  SString responseString;
+  responseString.deserialize(response.second);
+  std::runtime_error("Failed to fetch discarded food items, due to : " +
+                     (std::string)responseString);
+}
+
+void ChefHandler::displayDiscardFeedbackQuestions(
+    const std::vector<DTO::DiscardFeedbackQuestion> &questions) {
+  std::cout
+      << "\n.............Discard Feedback Questions.....................\n";
+  for (auto &discardFeedbackQuestion : questions) {
+    std::cout << "\n-----------------\n";
+    std::cout << "Question Id : " << discardFeedbackQuestion.questionId << "\n";
+    std::cout << "Question : " << (std::string)discardFeedbackQuestion.question
+              << "\n";
+    std::cout << "\n-----------------\n";
+  }
+  std::cout << "\n.............End of Discard Feedback "
+               "Questions.....................\n";
+}
+
+void ChefHandler::showDiscardFeedbackQuestions() {
+  std::vector<DTO::FoodItem> foodItems = getDiscardedFoodItems();
+  showFoodItems(foodItems);
+  std::pair<uint64_t, uint64_t> itemIdRange = getItemIdRange(foodItems);
+  std::cout << "Enter the item id to view discard feedback questions: ";
+  InputHandler inputHandler;
+  U64 itemId =
+      inputHandler.getInput<uint64_t>([itemIdRange](const uint64_t &input) {
+        return input >= itemIdRange.first && input <= itemIdRange.second;
+      });
+  std::vector<DTO::DiscardFeedbackQuestion> discardFeedbackQuestions =
+      getDiscardFeedbackQuestions(itemId);
+  displayDiscardFeedbackQuestions(discardFeedbackQuestions);
+}
+
+void ChefHandler::addDiscardFeedbackQuestion() {
+  std::vector<DTO::FoodItem> foodItems = getDiscardedFoodItems();
+  showFoodItems(foodItems);
+  std::pair<uint64_t, uint64_t> itemIdRange = getItemIdRange(foodItems);
+  std::cout << "Enter the item id to add discard feedback question: ";
+  InputHandler inputHandler;
+  U64 itemId =
+      inputHandler.getInput<uint64_t>([itemIdRange](const uint64_t &input) {
+        return input >= itemIdRange.first && input <= itemIdRange.second;
+      });
+  std::string question;
+  std::cout << "Enter the question: ";
+  std::getline(std::cin >> std::ws, question);
+  Pair<SString, U64> discardFeedbackQuestion(question, itemId);
+  std::vector<unsigned char> payload = discardFeedbackQuestion.serialize();
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Chef/addDiscardQuestion", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    std::cout << "Discard feedback question added successfully\n";
+  } else {
+    SString responseString;
+    responseString.deserialize(response.second);
+    std::cout << "Failed to add discard feedback question due to : "
               << (std::string)responseString << "\n";
   }
 }

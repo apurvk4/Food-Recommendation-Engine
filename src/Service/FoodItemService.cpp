@@ -1,4 +1,7 @@
 #include "Service/FoodItemService.h"
+#include "DiscardFeedbackQuestion.h"
+#include "FoodItem.h"
+#include <cstdint>
 
 using Service::FoodItemService;
 
@@ -6,9 +9,14 @@ FoodItemService::FoodItemService(
     std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO,
     std::shared_ptr<DAO::IFeedbackDAO> feedbackDAO,
     std::shared_ptr<DAO::IReviewDAO> reviewDAO,
-    std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO)
+    std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO,
+    std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
+        discardFeedbackQuestionDAO,
+    std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO)
     : m_foodItemDAO(foodItemDAO), m_feedbackDAO(feedbackDAO),
-      m_reviewDAO(reviewDAO), m_foodItemAttributeDAO{foodItemAttributeDAO} {}
+      m_reviewDAO(reviewDAO), m_foodItemAttributeDAO{foodItemAttributeDAO},
+      m_discardFeedbackQuestionDAO{discardFeedbackQuestionDAO},
+      m_discardFeedbackAnswerDAO(discardFeedbackAnswerDAO) {}
 
 bool FoodItemService::addFoodItem(FoodItem foodItem) {
   return m_foodItemDAO->addFoodItem(foodItem);
@@ -152,4 +160,31 @@ FoodItemService::getAttributeDetails(const std::vector<uint64_t> &attributes) {
     }
   }
   return attributeDetails;
+}
+
+bool FoodItemService::addDiscardFeedbackQuestion(std::string question,
+                                                 uint64_t foodItemId) {
+  return m_discardFeedbackQuestionDAO->addQuestion(
+      DTO::DiscardFeedbackQuestion(0, foodItemId, question));
+}
+
+bool FoodItemService::addDiscardFeedbackAnswer(std::string answer,
+                                               uint64_t userId,
+                                               uint64_t questionId) {
+  return m_discardFeedbackAnswerDAO->addAnswer(
+      DTO::DiscardFeedbackAnswer(0, questionId, userId, answer));
+}
+
+std::vector<DTO::DiscardFeedbackQuestion>
+FoodItemService::getQuestionByFoodItemId(uint64_t foodItemId) {
+  return m_discardFeedbackQuestionDAO->getQuestionsByFoodItemId(foodItemId);
+}
+
+std::vector<DTO::DiscardFeedbackAnswer>
+FoodItemService::getAnswerByQuestionId(uint64_t questionId) {
+  return m_discardFeedbackAnswerDAO->getAnswersByQuestionId(questionId);
+}
+
+std::vector<DTO::FoodItem> FoodItemService::getDiscardedFoodItems() {
+  return m_foodItemDAO->getDiscardedFoodItems();
 }

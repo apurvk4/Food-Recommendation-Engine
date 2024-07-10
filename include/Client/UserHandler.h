@@ -3,6 +3,7 @@
 #include "Category.h"
 #include "Client/ClientCommunicator.h"
 #include "Client/InputHandler.h"
+#include "FoodItem.h"
 #include "Notification.h"
 #include "Role.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
@@ -32,6 +33,7 @@ public:
   UserHandler(DTO::Role roleId) : roleId(roleId) {}
   virtual void performAction() = 0;
   std::string getDate(int64_t hourOffset);
+  void showFoodItems(const std::vector<DTO::FoodItem> &foodItems);
   DTO::Category getCategoryInput();
   virtual bool login();
   virtual bool logout();

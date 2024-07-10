@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Category.h"
+#include "DAO/IDiscardFeedbackQuestionDAO.h"
 #include "DAO/IFeedbackDAO.h"
 #include "DAO/IFoodItemDAO.h"
 #include "DTO/Feedback.h"
 #include "DTO/FoodItem.h"
 #include "DTO/Review.h"
+#include "IDiscardFeedbackAnswerDAO.h"
+#include "IDiscardFeedbackQuestionDAO.h"
 #include "IFoodItemAttribute.h"
 #include "IReviewDAO.h"
 #include <memory>
@@ -24,13 +27,20 @@ class FoodItemService {
   std::shared_ptr<DAO::IFeedbackDAO> m_feedbackDAO;
   std::shared_ptr<DAO::IReviewDAO> m_reviewDAO;
   std::shared_ptr<DAO::IFoodItemAttribute> m_foodItemAttributeDAO;
+  std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
+      m_discardFeedbackQuestionDAO;
+  std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> m_discardFeedbackAnswerDAO;
 
 public:
   FoodItemService(
       std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO,
       std::shared_ptr<DAO::IFeedbackDAO> feedbackDAO,
       std::shared_ptr<DAO::IReviewDAO> reviewDAO,
-      std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO);
+      std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO,
+      std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
+          discardFeedbackQuestionDAO,
+      std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO);
+
   bool addFoodItem(FoodItem foodItem);
   bool updateFoodItem(FoodItem foodItem);
   bool deleteFoodItem(uint64_t foodItemId);
@@ -57,7 +67,18 @@ public:
                                uint64_t foodItemId);
   std::vector<DTO::FoodItem>
   getFoodItemsWithGivenAttributes(uint64_t attributeId);
-  std::vector<std::pair<uint64_t,std::string>> getAttributeDetails(const std::vector<uint64_t>& attributeId);
+  std::vector<std::pair<uint64_t, std::string>>
+  getAttributeDetails(const std::vector<uint64_t> &attributeId);
+
+  bool addDiscardFeedbackQuestion(std::string question, uint64_t foodItemId);
+  bool addDiscardFeedbackAnswer(std::string answer, uint64_t userId,
+                                uint64_t questionId);
+  std::vector<DTO::DiscardFeedbackQuestion>
+  getQuestionByFoodItemId(uint64_t foodItemId);
+
+  std::vector<DTO::DiscardFeedbackAnswer>
+  getAnswerByQuestionId(uint64_t questionId);
+  std::vector<DTO::FoodItem> getDiscardedFoodItems();
 };
 
 }; // namespace Service

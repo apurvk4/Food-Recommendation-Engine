@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Category.h"
+#include "DiscardFeedbackQuestion.h"
 #include "Feedback.h"
 #include "FoodItem.h"
 #include "Menu.h"
@@ -13,7 +14,6 @@ class ChefHandler : public UserHandler {
 
   void handleUserSelection(int choice);
   std::vector<DTO::FoodItem> getFoodItems();
-  void showFoodItems(const std::vector<DTO::FoodItem> &foodItems);
   std::vector<DTO::FoodItem> getFoodItemRecommendation();
   void showFoodItemRecommendation();
   void createTodaysMenu();
@@ -24,6 +24,16 @@ class ChefHandler : public UserHandler {
   getItemIdRange(std::vector<DTO::FoodItem> &foodItems);
   std::vector<DTO::MenuItem> getMenuItemInput();
   void displayVotingResult(const std::vector<DTO::VotingResult> &votingResults);
+  std::vector<DTO::FoodItem> getFoodItemsBelowRating(double rating);
+  void showFoodItemsToBeDiscarded();
+  void discardFoodItem();
+  std::vector<DTO::DiscardFeedbackQuestion>
+  getDiscardFeedbackQuestions(U64 foodItemId);
+  void showDiscardFeedbackQuestions();
+  void addDiscardFeedbackQuestion();
+  void displayDiscardFeedbackQuestions(
+      const std::vector<DTO::DiscardFeedbackQuestion> &questions);
+  std::vector<DTO::FoodItem> getDiscardedFoodItems();
 
 public:
   ChefHandler();

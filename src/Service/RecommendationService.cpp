@@ -1,5 +1,6 @@
 #include "Service/RecommendationService.h"
 #include "Category.h"
+#include "FoodItem.h"
 #include "SentimentalAnalysis.h"
 #include <algorithm>
 #include <limits>
@@ -109,4 +110,27 @@ RecommendationService::getRecommendedFoodItems(DTO::Category foodItemType,
   }
 
   return recommendedFoodItems;
+}
+
+std::vector<DTO::FoodItem>
+RecommendationService::getFoodItemsBelowRating(double rating) {
+  std::vector<DTO::FoodItem> foodItems = foodItemDAO->getAllFoodItems();
+
+  std::vector<std::pair<DTO::FoodItem, double>> foodItemRatingPairs;
+  for (const auto &foodItem : foodItems) {
+    double rating = getFoodItemRating(foodItem.foodItemId);
+    foodItemRatingPairs.push_back({foodItem, rating});
+  }
+  std::sort(
+      foodItemRatingPairs.begin(), foodItemRatingPairs.end(),
+      [](std::pair<DTO::FoodItem, double> a,
+         std::pair<DTO::FoodItem, double> b) { return a.second < b.second; });
+
+  std::vector<DTO::FoodItem> foodItemsBelowRating;
+  for (const auto &pair : foodItemRatingPairs) {
+    if (pair.second < rating - std::numeric_limits<double>::epsilon()) {
+      foodItemsBelowRating.push_back(pair.first);
+    }
+  }
+  return foodItemsBelowRating;
 }

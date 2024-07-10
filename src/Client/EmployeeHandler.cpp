@@ -4,6 +4,7 @@
 #include "Client/InputHandler.h"
 #include "Client/TcpClient.h"
 #include "Client/UserHandler.h"
+#include "DiscardFeedbackAnswer.h"
 #include "Feedback.h"
 #include "FoodItem.h"
 #include "Menu.h"
@@ -222,6 +223,12 @@ void EmployeeHandler::handleUserSelection(int choice) {
     deleteFoodItemPreference();
     break;
   case 9:
+    showDiscardedFoodItems();
+    break;
+  case 10:
+    addDiscardFeedbackAnswer();
+    break;
+  case 11:
     logout();
     break;
   default:
@@ -269,12 +276,14 @@ void EmployeeHandler::performAction() {
               << "6. set Food Preferences\n"
               << "7. get Food Preferences\n"
               << "8. remove Food Preferences\n"
-              << "9. Logout\n"
+              << "9. Show Discarded Food Items\n"
+              << "10. Provide Discard Feedback\n"
+              << "11. Logout\n"
               << "Enter your choice: ";
     choice = inputHandler.getInput<int>(
-        [](const int &input) { return input >= 1 && input <= 9; });
+        [](const int &input) { return input >= 1 && input <= 11; });
     handleUserSelection(choice);
-  } while (choice != 9);
+  } while (choice != 11);
 }
 
 EmployeeHandler::EmployeeHandler()
@@ -406,5 +415,132 @@ void EmployeeHandler::setFoodItemPreference() {
     SString error;
     error.deserialize(response.second);
     std::cout << "Error : " << (std::string)error << std::endl;
+  }
+}
+
+std::vector<DTO::FoodItem> EmployeeHandler::getDiscardedFoodItems() {
+  std::vector<DTO::FoodItem> discardedFoodItems;
+  std::vector<unsigned char> payload;
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Employee/getDiscardedItem", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    Array<DTO::FoodItem> responseArray;
+    responseArray.deserialize(response.second);
+    discardedFoodItems = responseArray;
+    return discardedFoodItems;
+  }
+  SString error;
+  error.deserialize(response.second);
+  throw std::runtime_error("Error : " + (std::string)error);
+}
+
+std::vector<DTO::DiscardFeedbackQuestion>
+EmployeeHandler::getDiscardFeedbackQuestions(U64 foodItemId) {
+  std::vector<DTO::DiscardFeedbackQuestion> discardFeedbackQuestions;
+  std::vector<unsigned char> payload = foodItemId.serialize();
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Employee/getQuestions", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    Array<DTO::DiscardFeedbackQuestion> responseArray;
+    responseArray.deserialize(response.second);
+    discardFeedbackQuestions = responseArray;
+    return discardFeedbackQuestions;
+  }
+  SString error;
+  error.deserialize(response.second);
+  throw std::runtime_error("Error : " + (std::string)error);
+}
+
+void EmployeeHandler::showDiscardedFoodItems() {
+  std::vector<DTO::FoodItem> discardedFoodItems;
+  try {
+    discardedFoodItems = getDiscardedFoodItems();
+    showFoodItems(discardedFoodItems);
+  } catch (std::exception &e) {
+    std::cout << "Error getting discarded food items : " << e.what()
+              << std::endl;
+  }
+}
+
+void EmployeeHandler::showDiscardFeedbackQuestions() {
+  std::vector<DTO::FoodItem> discardedFoodItems;
+  try {
+    discardedFoodItems = getDiscardedFoodItems();
+    showFoodItems(discardedFoodItems);
+  } catch (std::exception &e) {
+    std::cout << "Error getting discarded food items : " << e.what()
+              << std::endl;
+    return;
+  }
+  std::cout << "Enter food item id for which you want to provide feedback: ";
+  InputHandler inputHandler;
+  U64 foodItemId = inputHandler.getInput<uint64_t>(
+      [](const uint64_t &input) { return input > 0; });
+  std::vector<DTO::DiscardFeedbackQuestion> discardFeedbackQuestions;
+  try {
+    discardFeedbackQuestions = getDiscardFeedbackQuestions(foodItemId);
+    displayDiscardFeedbackQuestions(discardFeedbackQuestions);
+  } catch (std::exception &e) {
+    std::cout << "Error getting discard feedback questions : " << e.what()
+              << std::endl;
+  }
+}
+
+void EmployeeHandler::displayDiscardFeedbackQuestions(
+    const std::vector<DTO::DiscardFeedbackQuestion> &questions) {
+  for (auto &question : questions) {
+    std::cout << "Question: " << (std::string)question.question << std::endl;
+  }
+}
+
+void EmployeeHandler::addDiscardFeedbackAnswer() {
+  std::vector<DTO::FoodItem> discardedFoodItems;
+  try {
+    discardedFoodItems = getDiscardedFoodItems();
+    showFoodItems(discardedFoodItems);
+  } catch (std::exception &e) {
+    std::cout << "Error getting discarded food items : " << e.what()
+              << std::endl;
+    return;
+  }
+  std::cout << "Enter food item id for which you want to provide feedback: ";
+  InputHandler inputHandler;
+  U64 foodItemId = inputHandler.getInput<uint64_t>(
+      [](const uint64_t &input) { return input > 0; });
+  std::vector<DTO::DiscardFeedbackQuestion> discardFeedbackQuestions;
+  try {
+    discardFeedbackQuestions = getDiscardFeedbackQuestions(foodItemId);
+    displayDiscardFeedbackQuestions(discardFeedbackQuestions);
+  } catch (std::exception &e) {
+    std::cout << "Error getting discard feedback questions : " << e.what()
+              << std::endl;
+    return;
+  }
+  for (auto &question : discardFeedbackQuestions) {
+    std::cout << "Enter answer for question: " << (std::string)question.question
+              << ": ";
+    std::string answer;
+    std::getline(std::cin >> std::ws, answer);
+    DTO::DiscardFeedbackAnswer feedbackAnswer;
+    feedbackAnswer.questionId = question.questionId;
+    feedbackAnswer.userId = user.userId;
+    feedbackAnswer.answer = answer;
+
+    std::vector<unsigned char> payload = feedbackAnswer.serialize();
+    ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+    clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                   "/Employee/addAnswer", payload);
+    auto response = clientCommunicator.receiveResponse();
+    if (response.first == 0) {
+      std::cout << "Feedback answer submitted successfully\n";
+    } else {
+      SString error;
+      error.deserialize(response.second);
+      std::cout << "Error : " << (std::string)error << std::endl;
+    }
   }
 }

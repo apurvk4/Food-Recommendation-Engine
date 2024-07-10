@@ -48,6 +48,15 @@ class EmployeeController : public IController {
   bool getFoodPreferences(std::shared_ptr<TcpSocket> socket,
                           TCPRequest &request,
                           std::vector<unsigned char> &payload);
+  bool getDiscardedFoodItems(std::shared_ptr<TcpSocket> socket,
+                             TCPRequest &request,
+                             std::vector<unsigned char> &payload);
+  bool getDiscardedFoodItemQuestions(std::shared_ptr<TcpSocket> socket,
+                                     TCPRequest &request,
+                                     std::vector<unsigned char> &payload);
+  bool addDiscardedFoodItemAnswer(std::shared_ptr<TcpSocket> socket,
+                                  TCPRequest &request,
+                                  std::vector<unsigned char> &payload);
   void sortFoodItems(uint64_t userId,
                      std::vector<Service::FoodItem> &foodItems);
 

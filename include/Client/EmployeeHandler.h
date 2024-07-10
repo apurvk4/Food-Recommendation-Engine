@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DiscardFeedbackQuestion.h"
 #include "Menu.h"
 #include "UserHandler.h"
 #include <cstdint>
@@ -26,6 +27,14 @@ class EmployeeHandler : public UserHandler {
   void
   displayMenu(const DTO::Menu menu,
               std::vector<std::pair<double, DTO::FoodItem>> foodItemWithRating);
+  std::vector<DTO::FoodItem> getDiscardedFoodItems();
+  void showDiscardedFoodItems();
+  std::vector<DTO::DiscardFeedbackQuestion>
+  getDiscardFeedbackQuestions(U64 foodItemId);
+  void showDiscardFeedbackQuestions();
+  void displayDiscardFeedbackQuestions(
+      const std::vector<DTO::DiscardFeedbackQuestion> &questions);
+  void addDiscardFeedbackAnswer();
 
 public:
   EmployeeHandler();

@@ -12,6 +12,8 @@ void RouteHandler::registerController(std::shared_ptr<IController> controller) {
 void RouteHandler::routeRequest(TcpSocket socket, TCPRequest request,
                                 std::vector<unsigned char> &payload) {
   std::smatch match;
+  // Matches a string starting with a slash, followed by non-slash characters
+  // (group 1), and optionally the rest starting from another slash (group 2)
   std::regex pattern(R"(^(/[^/]+)(/.*)?$)");
   std::string endpoint = request.protocolHeader.endpoint;
   if (std::regex_match(endpoint, match, pattern)) {
@@ -31,23 +33,10 @@ void RouteHandler::routeRequest(TcpSocket socket, TCPRequest request,
 void RouteHandler::defaultHandler(TcpSocket socket, TCPRequest request,
                                   std::vector<unsigned char> &payload) {
   std::cout << "Default handler called" << std::endl;
-  ProtocolHeader header;
-  header.senderIp = request.protocolHeader.receiverIp;
-  header.senderPort = request.protocolHeader.receiverPort;
-  header.receiverIp = request.protocolHeader.senderIp;
-  header.receiverPort = request.protocolHeader.senderPort;
-  header.requestId = 400;
-  header.payloadSize = 0;
-  std::memcpy(header.endpoint, request.protocolHeader.endpoint,
-              MAX_ENDPOINT_SIZE);
-  SString response("No controller found for endpoint: " +
-                   std::string(header.endpoint));
-  header.payloadSize = response.getSize();
-  std::vector<unsigned char> buffer;
-  writeProtocolHeader(buffer, header);
-  auto result = response.serialize();
-  buffer.insert(buffer.end(), result.begin(), result.end());
-  socket.sendData(buffer);
-  socket.shutdown(SHUTDOWN_BOTH);
-  socket.close();
+  std::vector<unsigned char> response;
+  SString responseString("No controller found for endpoint: " +
+                         std::string(request.protocolHeader.endpoint));
+  std::vector<unsigned char> responsePayload = responseString.serialize();
+  writeResponse(response, request, 400, responsePayload);
+  socket.sendData(response);
 }

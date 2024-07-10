@@ -38,6 +38,24 @@ class ChefController : public IController {
   bool viewFoodItems(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                      std::vector<unsigned char> &payload);
 
+  bool addDiscardFeedbackQuestion(std::shared_ptr<TcpSocket> socket,
+                                  TCPRequest &request,
+                                  std::vector<unsigned char> &payload);
+  bool discardFoodItem(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+                       std::vector<unsigned char> &payload);
+  bool viewDiscardFeedbackAnswers(std::shared_ptr<TcpSocket> socket,
+                                  TCPRequest &request,
+                                  std::vector<unsigned char> &payload);
+  bool viewDiscardFeedbackQuestions(std::shared_ptr<TcpSocket> socket,
+                                    TCPRequest &request,
+                                    std::vector<unsigned char> &payload);
+  bool getFoodItemsBelowRating(std::shared_ptr<TcpSocket> socket,
+                               TCPRequest &request,
+                               std::vector<unsigned char> &payload);
+  bool getDiscardedFoodItems(std::shared_ptr<TcpSocket> socket,
+                             TCPRequest &request,
+                             std::vector<unsigned char> &payload);
+
 public:
   ChefController(
       const std::string &authEndpoint,

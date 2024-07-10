@@ -3,6 +3,7 @@
 #include "Category.h"
 #include "DAO/IFoodItemDAO.h"
 #include "DbConnection.h"
+#include "FoodItem.h"
 #include <memory>
 
 namespace DAO {
@@ -22,6 +23,7 @@ public:
   std::vector<DTO::FoodItem>
   getFoodItemsByType(DTO::Category foodItemType) override;
   std::vector<DTO::FoodItem> getAllFoodItems() override;
+  std::vector<DTO::FoodItem> getDiscardedFoodItems() override;
 };
 
 }; // namespace DAO

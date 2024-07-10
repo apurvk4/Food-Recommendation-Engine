@@ -25,6 +25,7 @@ public:
                         std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO);
   std::vector<DTO::FoodItem> getRecommendedFoodItems(DTO::Category, U32 count);
   double getFoodItemRating(uint64_t foodItemId);
+  std::vector<DTO::FoodItem> getFoodItemsBelowRating(double rating);
 };
 
 }; // namespace Service
