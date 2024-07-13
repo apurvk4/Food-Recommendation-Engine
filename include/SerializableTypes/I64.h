@@ -36,8 +36,9 @@ public:
   size_t getSize() override { return sizeof(value); }
 
   std::vector<unsigned char> serialize() override {
-    uint64_t tempValue = 0;
+    int64_t tempValue = 0;
     memcpy(&tempValue, &value, sizeof(int64_t));
+    tempValue = hton64(tempValue);
     std::vector<unsigned char> bytes(sizeof(int64_t), 0);
     memcpy(bytes.data(), &tempValue, sizeof(int64_t));
     return bytes;
@@ -48,7 +49,8 @@ public:
       throw std::runtime_error("Too few bytes to deserialize");
     }
     memcpy(&value, bytes.data(), sizeof(int64_t));
-    uint64_t *tempValue = (uint64_t *)&value;
+    int64_t *tempValue = (int64_t *)&value;
+    *tempValue = ntoh64(*tempValue);
     return sizeof(value);
   }
 };

@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 
 class U64 : public Serializable {
@@ -38,6 +39,7 @@ public:
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes(sizeof(value), 0);
     uint64_t tempValue = value;
+    tempValue = hton64(tempValue);
     memcpy(bytes.data(), &tempValue, sizeof(value));
     return bytes;
   }
@@ -47,6 +49,7 @@ public:
     }
     value = 0;
     memcpy(&value, bytes.data(), sizeof(value));
+    value = ntoh64(value);
     return sizeof(value);
   }
 };

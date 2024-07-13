@@ -37,7 +37,8 @@ public:
 
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes(sizeof(value), 0);
-    uint32_t tempValue = (uint32_t)value;
+    int32_t tempValue = value;
+    tempValue = htonl(tempValue);
     memcpy(bytes.data(), &tempValue, sizeof(value));
     return bytes;
   }
@@ -47,7 +48,7 @@ public:
       throw std::runtime_error("Too few bytes to deserialize");
     }
     memcpy(&value, bytes.data(), sizeof(value));
-    uint32_t *tempValue = (uint32_t *)&value;
+    value = ntohl(value);
     return sizeof(value);
   }
 };
