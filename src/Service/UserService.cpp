@@ -75,8 +75,6 @@ UserService::getUnreadNotifications(uint64_t userId) {
       }
     }
     user.lastNotificationId = maxNotificationId;
-    std::cout << "Updating last notification id for user : "
-              << user.lastNotificationId << std::endl;
     userDAO->updateUser(user);
   }
   return notifications;

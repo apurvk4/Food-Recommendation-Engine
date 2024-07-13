@@ -52,8 +52,6 @@ FoodItemAttributeDAO::getFoodItemAttributes(uint64_t foodItemId) {
     uint64_t attributeId = resultSet->getUInt64("attributeId");
     foodItemAttributes.push_back(attributeId);
   }
-  std::cout << "size of  foodItemAttributes: " << foodItemAttributes.size()
-            << "\n";
   auto allAttributes = getAllAttributes();
   std::vector<std::pair<uint64_t, std::string>> foodItemAttributesPair;
   for (auto attributeId : foodItemAttributes) {
