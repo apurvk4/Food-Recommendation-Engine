@@ -33,7 +33,7 @@ void RequestHandler::handleRequest(TcpSocket socket) {
     auto data = socket.receiveData();
     auto [request, payload] = parseHeaders(data);
     std::cout << "handling request\n";
-    routeHandler.routeRequest(std::move(socket), request, payload);
+    routeHandler->routeRequest(std::move(socket), request, payload);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
   }

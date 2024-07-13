@@ -17,13 +17,14 @@
 
 ClientApplication::ClientApplication() : userHandler(nullptr) {}
 
-void ClientApplication::run() {
+void ClientApplication::start() {
   while (true) {
     displayMenu();
     InputHandler inputHandler;
     int choice = inputHandler.getInput<int>(
         [](const int &input) { return input >= 1 && input <= 3; });
     handleUserSelection(choice);
+    userHandler.reset();
     char ch;
     std::cout << "Do you want to continue? (y/n): ";
     std::cin >> ch;
@@ -31,6 +32,13 @@ void ClientApplication::run() {
       break;
     }
   }
+}
+
+void ClientApplication::stop() {
+  if (userHandler) {
+    userHandler->logout();
+  }
+  exit(0);
 }
 
 void ClientApplication::displayMenu() {
