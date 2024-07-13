@@ -55,7 +55,6 @@ Role UserService::getRole(uint64_t id) {
 bool UserService::addActivity(uint64_t userId, DTO::ActivityType activityType) {
   DTO::UserActivity userActivity(0, userId, (uint64_t)activityType, 0);
   bool result = userActivityDAO->addUserActivity(userActivity);
-  std::cout << "User Activity addition status : " << result;
   return result;
 }
 

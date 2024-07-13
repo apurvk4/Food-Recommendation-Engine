@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RequestHandler.h"
+#include "Server/LoadBalancer.h"
 #include "Sockets/SocketUtils.h"
 #include "Sockets/TcpSocket.h"
 #include <cstdint>
@@ -11,6 +12,7 @@
 namespace Server {
 
 class FoodRecommendationServer {
+  LoadBalancer loadBalancer;
   const int connectionBacklog;
   sockaddr_in serverAddress;
   SOCKET serverSocket;

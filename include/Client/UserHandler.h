@@ -32,9 +32,9 @@ protected:
 public:
   UserHandler(DTO::Role roleId) : roleId(roleId) {}
   virtual void performAction() = 0;
-  std::string getDate(int64_t hourOffset);
-  void showFoodItems(const std::vector<DTO::FoodItem> &foodItems);
+  void displayFoodItems(const std::vector<DTO::FoodItem> &foodItems);
   DTO::Category getCategoryInput();
+  std::string getDateInput();
   virtual bool login();
   virtual bool logout();
   virtual bool viewNotifications(const std::string &endpoint);

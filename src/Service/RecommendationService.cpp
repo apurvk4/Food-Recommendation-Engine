@@ -1,7 +1,6 @@
 #include "Service/RecommendationService.h"
 #include "Category.h"
 #include "FoodItem.h"
-#include "SentimentalAnalysis.h"
 #include <algorithm>
 #include <limits>
 
@@ -12,49 +11,55 @@ RecommendationService::RecommendationService(
     std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO)
     : reviewDAO(reviewDAO), foodItemDAO(foodItemDAO) {}
 
-double RecommendationService::normalizeScore(double score, double min,
-                                             double max) {
-  return 1.0 + 4.0 * (score - min) / (max - min);
+double RecommendationService::normalizeToRange(double value, double min,
+                                               double max, double newMin,
+                                               double newMax) {
+  // Ensure value is within the range [min, max]
+  double clampedValue = std::min(std::max(value, min), max);
+
+  // Normalize to [0, 1]
+  double normalizedValue = (clampedValue - min) / (max - min);
+
+  // Map to [newMin, newMax] using logarithmic mapping
+  double mappedValue =
+      exp(normalizedValue * log(newMax - newMin + 1)) + newMin - 1;
+
+  // Ensure the mapped value is within the new range [newMin, newMax]
+  return std::min(std::max(mappedValue, newMin), newMax);
 }
 
 double RecommendationService::findSentimentScore(
-    uint64_t foodItemId, SentimentAnalyzer &sentimentAnalyzer,
-    double &minSentiment, double &maxSentiment) {
+    uint64_t foodItemId, SentimentAnalyzer &sentimentAnalyzer) {
   std::vector<DTO::Review> foodItemReviews =
       reviewDAO->getReviewsByFoodItemId(foodItemId);
   if (foodItemReviews.empty()) {
     return 3.0; // default average rating if no reviews present
   }
 
-  double sentimentSum = 0;
-  double ratingSum = 0;
-  for (auto &review : foodItemReviews) {
+  double foodItemRatingSum = 0.0;
+  double foodItemSentimentSum = 0.0;
+  uint64_t foodItemReviewCount = 0;
+  for (const auto &review : foodItemReviews) {
     double sentimentScore = sentimentAnalyzer.analyze(review.comment);
-    sentimentSum += sentimentScore;
-    ratingSum += review.rating;
-    minSentiment = std::min(minSentiment, sentimentScore);
-    maxSentiment = std::max(maxSentiment, sentimentScore);
+    foodItemRatingSum += review.rating;
+    foodItemSentimentSum += sentimentScore;
+    foodItemReviewCount++;
   }
-
-  double averageSentiment = sentimentSum / foodItemReviews.size();
-  double averageRating = ratingSum / foodItemReviews.size();
-
-  return (0.7 * averageRating) + (0.3 * averageSentiment);
+  double averageRating = foodItemRatingSum / foodItemReviewCount;
+  double averageSentiment = foodItemSentimentSum / foodItemReviewCount;
+  double combinedScore =
+      (0.7 * (averageRating / 5.0)) +
+      (0.3 * (averageSentiment / 5.0)); // Now in range 0.0 to 1.0
+  double normalizedScore = normalizeToRange(combinedScore, 0.0, 1.0, 1.0, 5.0);
+  return normalizedScore;
 }
 
 double RecommendationService::getFoodItemRating(uint64_t foodItemId) {
   std::string lexiconFilePath = "../lexicon.txt";
-  SentimentAnalyzer sentimentAnalyzer(lexiconFilePath);
+  std::string stopWordsFilePath = "../stopWords.txt";
+  SentimentAnalyzer sentimentAnalyzer(lexiconFilePath, stopWordsFilePath);
 
-  double minSentiment = -1;
-  double maxSentiment = -1;
-
-  double combinedScore = findSentimentScore(foodItemId, sentimentAnalyzer,
-                                            minSentiment, maxSentiment);
-
-  if (minSentiment != -1 && maxSentiment != -1) {
-    double result = normalizeScore(combinedScore, minSentiment, maxSentiment);
-  }
+  double combinedScore = findSentimentScore(foodItemId, sentimentAnalyzer);
   return combinedScore;
 }
 
@@ -62,24 +67,17 @@ std::vector<DTO::FoodItem>
 RecommendationService::getRecommendedFoodItems(DTO::Category foodItemType,
                                                U32 count) {
   std::string lexiconFilePath = "../lexicon.txt";
-  SentimentAnalyzer sentimentAnalyzer(lexiconFilePath);
+  std::string stopWordsFilePath = "../stopWords.txt";
+  SentimentAnalyzer sentimentAnalyzer(lexiconFilePath, stopWordsFilePath);
 
   std::vector<DTO::FoodItem> foodItems =
       foodItemDAO->getFoodItemsByType(foodItemType);
 
-  double minSentiment = std::numeric_limits<double>::max();
-  double maxSentiment = std::numeric_limits<double>::min();
-
   std::map<uint64_t, double> foodItemCombinedScore;
   for (const auto &foodItem : foodItems) {
-    double combinedScore = findSentimentScore(
-        foodItem.foodItemId, sentimentAnalyzer, minSentiment, maxSentiment);
+    double combinedScore =
+        findSentimentScore(foodItem.foodItemId, sentimentAnalyzer);
     foodItemCombinedScore[foodItem.foodItemId] = combinedScore;
-  }
-
-  // Normalize the combined scores to be between 1 and 5
-  for (auto &pair : foodItemCombinedScore) {
-    pair.second = normalizeScore(pair.second, minSentiment, maxSentiment);
   }
 
   std::vector<std::pair<uint64_t, double>> foodItemScorePairs(
@@ -132,5 +130,26 @@ RecommendationService::getFoodItemsBelowRating(double rating) {
       foodItemsBelowRating.push_back(pair.first);
     }
   }
+  std::cout << "Found " << foodItemsBelowRating.size()
+            << " food items below rating " << rating << std::endl;
   return foodItemsBelowRating;
+}
+
+std::vector<std::pair<double, std::vector<std::string>>>
+RecommendationService::getSentiment(std::vector<std::string> responses) {
+  std::string lexiconFilePath = "../lexicon.txt";
+  std::string stopWordsFilePath = "../stopWords.txt";
+  SentimentAnalyzer sentimentAnalyzer(lexiconFilePath, stopWordsFilePath);
+
+  std::vector<std::pair<double, std::vector<std::string>>> sentimentScores;
+  for (const auto &response : responses) {
+    double sentimentScore = sentimentAnalyzer.analyze(response);
+    auto frequentWords = sentimentAnalyzer.frequentWords(responses, 5);
+    std::vector<std::string> words;
+    for (const auto &pair : frequentWords) {
+      words.push_back(pair.first);
+    }
+    sentimentScores.push_back({sentimentScore, words});
+  }
+  return sentimentScores;
 }

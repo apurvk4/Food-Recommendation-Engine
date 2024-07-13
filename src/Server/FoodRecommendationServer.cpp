@@ -1,5 +1,6 @@
 #include "Server/FoodRecommendationServer.h"
 
+#include "Server/LoadBalancer.h"
 #include "Sockets/Socket.h"
 #include "Sockets/SocketUtils.h"
 #include <cstring>
@@ -92,7 +93,10 @@ void FoodRecommendationServer::start(in_addr serverIp, uint16_t portNumber) {
     sockaddr_in remoteAddress;
     memset(&remoteAddress, 0, sizeof(remoteAddress));
     acceptedSocket = accept(serverSocket, (sockaddr *)&remoteAddress, &size);
-    handleAcceptedSocket(acceptedSocket, remoteAddress);
+    loadBalancer.distributeTask(
+        [this, &acceptedSocket, &remoteAddress]() mutable {
+          handleAcceptedSocket(acceptedSocket, remoteAddress);
+        });
   }
 }
 
@@ -101,4 +105,4 @@ void FoodRecommendationServer::stop() { isRunning = false; }
 FoodRecommendationServer::FoodRecommendationServer(
     RequestHandler &connectionHandler, int connectionBacklog = 5)
     : connectionBacklog{connectionBacklog}, requestHandler{connectionHandler},
-      isRunning{false} {}
+      isRunning{false}, loadBalancer(std::thread::hardware_concurrency() - 1) {}

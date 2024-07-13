@@ -92,6 +92,8 @@ MenuService::getMenuByDate(std::string date) {
   std::vector<std::pair<DTO::Menu, std::vector<DTO::MenuItem>>> result;
   std::vector<DTO::Menu> menus = menuDAO->getAllMenus();
   for (auto &menu : menus) {
+    std::cout << "menu date :" << (std::string)menu.date << std::endl;
+    std::cout << "input date : " << date << std::endl;
     if (menu.date == date) {
       std::vector<DTO::MenuItem> menuItems =
           menuItemDAO->getMenuItemByMenuId(menu.menuId);

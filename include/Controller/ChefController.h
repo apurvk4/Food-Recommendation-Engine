@@ -22,6 +22,7 @@ class ChefController : public IController {
       std::function<bool(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                          std::vector<unsigned char> &payload)>>
       authRoutes;
+  void registerRoutes();
 
   bool getRecommendedMenu(std::shared_ptr<TcpSocket> socket,
                           TCPRequest &request,
@@ -29,6 +30,12 @@ class ChefController : public IController {
   bool rolloutMenu(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                    std::vector<unsigned char> &payload);
   bool createMenu(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+                  std::vector<unsigned char> &payload);
+  bool viewRolloutMenu(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+                       std::vector<unsigned char> &payload);
+  bool viewMenu(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+                std::vector<unsigned char> &payload);
+  bool updateMenu(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                   std::vector<unsigned char> &payload);
   bool viewRolloutFeedback(std::shared_ptr<TcpSocket> socket,
                            TCPRequest &request,
@@ -43,9 +50,9 @@ class ChefController : public IController {
                                   std::vector<unsigned char> &payload);
   bool discardFoodItem(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                        std::vector<unsigned char> &payload);
-  bool viewDiscardFeedbackAnswers(std::shared_ptr<TcpSocket> socket,
-                                  TCPRequest &request,
-                                  std::vector<unsigned char> &payload);
+  bool viewDiscardFeedbackAnswerSentiments(std::shared_ptr<TcpSocket> socket,
+                                           TCPRequest &request,
+                                           std::vector<unsigned char> &payload);
   bool viewDiscardFeedbackQuestions(std::shared_ptr<TcpSocket> socket,
                                     TCPRequest &request,
                                     std::vector<unsigned char> &payload);

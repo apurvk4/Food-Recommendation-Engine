@@ -61,7 +61,8 @@ public:
       throw std::runtime_error("Not enough bytes to deserialize SString");
     }
     U64 size = 0;
-    uint64_t bytesRead = size.deserialize(bytes);
+    uint64_t bytesRead = 0;
+    bytesRead += size.deserialize(bytes);
     if ((uint64_t)size == 0) {
       value = "";
       return bytesRead;

@@ -60,6 +60,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(mysqlcppconn REQUIRED)
 find_package(Threads REQUIRED)
 
+# Link against math library
+target_link_libraries(${PROJECT_NAME} PRIVATE m)
+
 # Link against libraries using keywords
 target_link_libraries(${PROJECT_NAME} PRIVATE mysqlcppconn::mysqlcppconn ${CMAKE_THREAD_LIBS_INIT})
 

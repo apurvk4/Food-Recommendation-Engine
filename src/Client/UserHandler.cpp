@@ -1,8 +1,7 @@
 #include "Client/UserHandler.h"
 #include "Category.h"
 #include "Notification.h"
-#include <chrono>
-#include <iomanip>
+#include <regex>
 
 bool UserHandler::viewNotifications(const std::string &endpoint) {
   std::vector<unsigned char> payload = user.userId.serialize();
@@ -23,21 +22,6 @@ bool UserHandler::viewNotifications(const std::string &endpoint) {
     std::cout << (std::string)responseString << std::endl;
     return false;
   }
-}
-
-std::string UserHandler::getDate(int64_t hourOffset) {
-
-  auto now = std::chrono::system_clock::now();
-
-  auto tomorrow = now + std::chrono::hours(hourOffset);
-
-  std::time_t tt = std::chrono::system_clock::to_time_t(tomorrow);
-  std::tm local_tm = *std::localtime(&tt);
-
-  std::ostringstream oss;
-  oss << std::put_time(&local_tm, "%Y-%m-%d");
-
-  return oss.str();
 }
 
 DTO::Category UserHandler::getCategoryInput() {
@@ -153,13 +137,14 @@ void UserHandler::displayFoodItemPreferences(
   }
   for (auto &foodItemPreference : foodItemPreferences) {
     std::cout << "Food Item Id: " << foodItemPreference.first
-              << " Food Item Name: " << foodItemPreference.second << std::endl;
+              << " Attribute: " << foodItemPreference.second << std::endl;
   }
   std::cout << "\n...................End of Food Item "
                "Preferences........................\n";
 }
 
-void UserHandler::showFoodItems(const std::vector<DTO::FoodItem> &foodItems) {
+void UserHandler::displayFoodItems(
+    const std::vector<DTO::FoodItem> &foodItems) {
   std::cout << "\n----------------Food Items------------------\n";
   for (auto &foodItem : foodItems) {
     std::cout << "\n-----------------\n";
@@ -174,4 +159,43 @@ void UserHandler::showFoodItems(const std::vector<DTO::FoodItem> &foodItems) {
               << foodItem.availabilityStatus << "\n";
     std::cout << "\n---------------------\n";
   }
+}
+
+std::string UserHandler::getDateInput() {
+  InputHandler inputHandler;
+  std::string date;
+
+  std::cout << "Enter year: ";
+  int year = inputHandler.getInput<int>(
+      [](const int &input) { return input >= 1900 && input <= 3000; });
+  date += std::to_string(year) + "-";
+  std::cout << "Enter month: ";
+  int month = inputHandler.getInput<int>(
+      [](const int &input) { return input >= 1 && input <= 12; });
+
+  if (month < 10) {
+    date += "0";
+  }
+  date += std::to_string(month) + "-";
+  std::cout << "Enter day: ";
+  int day = inputHandler.getInput<int>([&](const int &input) {
+    if (input < 1 || input > 31) {
+      return false;
+    }
+    if (month == 2) {
+      if (year % 4 == 0) {
+        return input <= 29;
+      } else {
+        return input <= 28;
+      }
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+      return input <= 30;
+    }
+    return true;
+  });
+  if (day < 10) {
+    date += "0";
+  }
+  date += std::to_string(day);
+  return date;
 }

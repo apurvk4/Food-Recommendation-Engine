@@ -313,8 +313,6 @@ bool AdminController::addAttribute(std::shared_ptr<TcpSocket> socket,
     data.deserialize(payload);
     U64 foodItemId = data.first;
     U64 attributeId = data.second;
-    std::cout << "attribute Id : " << attributeId
-              << " foodItemId : " << foodItemId << "\n";
     foodItemService->addAttributeToFoodItem(foodItemId, attributeId);
     std::vector<unsigned char> responsePayload;
     writeResponse(responseBuffer, request, 0, responsePayload);
@@ -381,9 +379,6 @@ bool AdminController::viewFoodItemAttributes(
           Pair<U64, SString>{attribute.first, attribute.second});
     }
     std::vector<unsigned char> payload = attributesArray.serialize();
-    std::cout << "response buffer size : " << responseBuffer.size()
-              << "\n number of elements : " << attributesArray.NumberOfItems()
-              << "\n";
     writeResponse(responseBuffer, request, 0, payload);
   } catch (std::exception &e) {
     std::cout << "Error getting food item attributes: " << e.what()

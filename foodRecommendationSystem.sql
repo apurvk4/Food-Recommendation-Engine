@@ -117,6 +117,7 @@ CREATE TABLE `Review`(
     `comment` TEXT NOT NULL,
     `date` DATE NOT NULL DEFAULT (CURRENT_DATE)
 );
+ALTER TABLE Review ADD CONSTRAINT unique_review UNIQUE (userId, foodItemId, date);
 
 ALTER TABLE
     `Review` ADD INDEX `reviews_userid_index`(`userId`);
@@ -242,6 +243,15 @@ BEGIN
     
     SET notification_message = CONCAT(notification_message, ' on ', NEW.date);
     
+    INSERT INTO Notification (message, date) VALUES (notification_message, NOW());
+END $$
+
+CREATE TRIGGER trg_create_discard_feedback_notification
+AFTER INSERT ON DiscardFeedbackQuestion
+FOR EACH ROW
+BEGIN
+    DECLARE notification_message TEXT;
+    SET notification_message = CONCAT('New discard feedback question added for food item "', (SELECT itemName FROM FoodItem WHERE foodItemId = NEW.foodItemId), '"');
     INSERT INTO Notification (message, date) VALUES (notification_message, NOW());
 END $$
 

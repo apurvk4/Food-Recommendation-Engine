@@ -19,7 +19,6 @@ bool FoodItemAttribute::addFoodItemAttribute(uint64_t foodItemId,
   addFoodItemAttributeStatement->setUInt64(1, foodItemId);
   addFoodItemAttributeStatement->setUInt64(2, attributeId);
   int rowsAffected = addFoodItemAttributeStatement->executeUpdate();
-  std::cout << "rows affected: " << rowsAffected << "\n";
   connection->commit();
   connection->setAutoCommit(true);
   return rowsAffected;

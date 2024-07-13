@@ -4,6 +4,7 @@
 #include "Feedback.h"
 #include "FoodItem.h"
 #include "SerializableTypes/Pair.h"
+#include "SerializableTypes/SString.h"
 #include <exception>
 #include <regex>
 
@@ -160,12 +161,23 @@ bool EmployeeController::viewMenu(std::shared_ptr<TcpSocket> socket,
       sortFoodItems(request.protocolHeader.userId, foodItems);
       result.push_back(std::make_pair(menu.first, foodItems));
     }
-    Array<Pair<DTO::Menu, Array<DTO::FoodItem>>> responseArray;
-    for (auto &menu : result) {
-      responseArray.push_back(
-          Pair(menu.first, Array<DTO::FoodItem>(menu.second)));
+    if (result.size() == 0) {
+      SString error("No menu found for the given date");
+      std::cout << (std::string)error << std::endl;
+      std::vector<unsigned char> serialized = error.serialize();
+      writeResponse(response, request, 400, serialized);
+      socket->sendData(response);
+      return true;
     }
-    std::vector<unsigned char> serialized = responseArray.serialize();
+    Pair<DTO::Menu, Array<Pair<DTO::FoodItem, Double>>> responsePair;
+    auto menu = result[0];
+    responsePair.first = menu.first;
+    for (auto &foodItem : menu.second) {
+      responsePair.second.push_back(Pair<DTO::FoodItem, Double>(
+          foodItem,
+          recommendationService->getFoodItemRating(foodItem.foodItemId)));
+    }
+    std::vector<unsigned char> serialized = responsePair.serialize();
     writeResponse(response, request, 0, serialized);
     socket->sendData(response);
   } catch (std::exception &e) {

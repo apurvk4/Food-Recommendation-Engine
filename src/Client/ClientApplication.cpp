@@ -56,5 +56,9 @@ void ClientApplication::handleUserSelection(int choice) {
     std::cerr << "Invalid choice\n";
     return;
   }
-  userHandler->performAction();
+  try {
+    userHandler->performAction();
+  } catch (std::exception &e) {
+    std::cerr << "Error: " << e.what() << "\n";
+  }
 }

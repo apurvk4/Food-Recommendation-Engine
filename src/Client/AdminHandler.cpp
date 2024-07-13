@@ -337,7 +337,6 @@ void AdminHandler::getFoodItemAttribute() {
   clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
                                  "/Admin/viewAttributes", payload);
   auto response = clientCommunicator.receiveResponse();
-  std::cout << "response payload size : " << response.second.size() << "\n";
   if (response.first == 0) {
     Array<Pair<U64, SString>> attributes;
     attributes.deserialize(response.second);

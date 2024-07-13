@@ -10,11 +10,13 @@
 #include "Menu.h"
 #include "Review.h"
 #include "Role.h"
+#include "SerializableTypes/Double.h"
 #include "SerializableTypes/Pair.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
+#include "Util.h"
 #include <stdexcept>
 
-std::pair<DTO::Menu, std::vector<DTO::FoodItem>>
+std::pair<DTO::Menu, std::vector<std::pair<DTO::FoodItem, double>>>
 EmployeeHandler::getMenu(U64 categoryId, SString date) {
   Pair<U64, SString> request;
   request.first = categoryId;
@@ -25,19 +27,18 @@ EmployeeHandler::getMenu(U64 categoryId, SString date) {
                                  "/Employee/viewMenu", payload);
   auto response = clientCommunicator.receiveResponse();
   if (response.first == 0) {
-    Array<Pair<DTO::Menu, Array<DTO::FoodItem>>> responseArray;
-    responseArray.deserialize(response.second);
-    std::vector<Pair<DTO::Menu, Array<DTO::FoodItem>>> menuData = responseArray;
-    std::vector<std::pair<DTO::Menu, std::vector<DTO::FoodItem>>>
-        menuWithFoodItems;
-    for (auto &menu : menuData) {
-      std::vector<DTO::FoodItem> foodItems = menu.second;
-      menuWithFoodItems.push_back(std::make_pair(menu.first, foodItems));
+    Pair<DTO::Menu, Array<Pair<DTO::FoodItem, Double>>> responsePair;
+    responsePair.deserialize(response.second);
+    auto menu = responsePair.first;
+    std::vector<Pair<DTO::FoodItem, Double>> foodItemsRating =
+        responsePair.second;
+    std::pair<DTO::Menu, std::vector<std::pair<DTO::FoodItem, double>>> result;
+    result.first = menu;
+    for (auto &foodItemPair : foodItemsRating) {
+      result.second.push_back(
+          std::make_pair(foodItemPair.first, foodItemPair.second));
     }
-    if (menuWithFoodItems.size() > 0) {
-      return menuWithFoodItems[0];
-    }
-    throw std::runtime_error("No menu available for today");
+    return result;
   }
   SString error;
   error.deserialize(response.second);
@@ -77,8 +78,7 @@ void EmployeeHandler::showTodaysMenu() {
   DTO::Category category = getCategoryInput();
   std::cout << "...............Menu for today......................\n";
   try {
-    std::pair<DTO::Menu, std::vector<DTO::FoodItem>> menu =
-        getMenu((uint64_t)category, getDate(0));
+    auto menu = getMenu((uint64_t)category, getDate(0));
     displayMenu(menu);
   } catch (std::exception &e) {
     std::cout << e.what() << std::endl;
@@ -166,16 +166,17 @@ void EmployeeHandler::addReview() {
   auto result = getMenu((uint64_t)category, getDate(0));
   displayMenu(result);
   for (auto &foodItem : result.second) {
-    std::cout << "Enter rating(1-5) for " << (std::string)foodItem.itemName
-              << ": ";
+    std::cout << "Enter rating(1-5) for "
+              << (std::string)foodItem.first.itemName << ": ";
     InputHandler inputHandler;
     int rating = inputHandler.getInput<int>(
         [](const int &input) { return input >= 1 && input <= 5; });
-    std::cout << "Enter comment for " << (std::string)foodItem.itemName << ": ";
+    std::cout << "Enter comment for " << (std::string)foodItem.first.itemName
+              << ": ";
     std::string comment;
     std::getline(std::cin >> std::ws, comment);
     DTO::Review review;
-    review.foodItemId = foodItem.foodItemId;
+    review.foodItemId = foodItem.first.foodItemId;
     review.rating = rating;
     review.comment = comment;
     review.userId = user.userId;
@@ -237,7 +238,8 @@ void EmployeeHandler::handleUserSelection(int choice) {
 }
 
 void EmployeeHandler::displayMenu(
-    const std::pair<DTO::Menu, std::vector<DTO::FoodItem>> &menus) {
+    const std::pair<DTO::Menu, std::vector<std::pair<DTO::FoodItem, double>>>
+        &menus) {
   std::cout << "\n...............Menu for today......................\n";
   std::cout << "Menu Id: " << menus.first.menuId << std::endl;
   std::cout << "Menu Name: " << (std::string)menus.first.menuName << std::endl;
@@ -249,13 +251,15 @@ void EmployeeHandler::displayMenu(
   std::cout << "Menu Items\n";
   for (auto &foodItem : menus.second) {
     std::cout << "\n--------------------------------\n";
-    std::cout << "Item Id: " << foodItem.foodItemId << std::endl;
-    std::cout << "Item Name: " << (std::string)foodItem.itemName << std::endl;
-    std::cout << "Item Price: " << foodItem.price << std::endl;
+    std::cout << "Item Id: " << foodItem.first.foodItemId << std::endl;
+    std::cout << "Item Name: " << (std::string)foodItem.first.itemName
+              << std::endl;
+    std::cout << "Item Price: " << foodItem.first.price << std::endl;
     std::cout << "Item Category: "
               << DTO::CategoryToString(
-                     (DTO::Category)(uint64_t)foodItem.foodItemTypeId)
+                     (DTO::Category)(uint64_t)foodItem.first.foodItemTypeId)
               << std::endl;
+    std::cout << "Item Rating: " << foodItem.second << std::endl;
     std::cout << "\n--------------------------------\n";
   }
   std::cout << "\n...............End of Menu for today......................\n";
@@ -459,7 +463,7 @@ void EmployeeHandler::showDiscardedFoodItems() {
   std::vector<DTO::FoodItem> discardedFoodItems;
   try {
     discardedFoodItems = getDiscardedFoodItems();
-    showFoodItems(discardedFoodItems);
+    displayFoodItems(discardedFoodItems);
   } catch (std::exception &e) {
     std::cout << "Error getting discarded food items : " << e.what()
               << std::endl;
@@ -470,7 +474,7 @@ void EmployeeHandler::showDiscardFeedbackQuestions() {
   std::vector<DTO::FoodItem> discardedFoodItems;
   try {
     discardedFoodItems = getDiscardedFoodItems();
-    showFoodItems(discardedFoodItems);
+    displayFoodItems(discardedFoodItems);
   } catch (std::exception &e) {
     std::cout << "Error getting discarded food items : " << e.what()
               << std::endl;
@@ -501,7 +505,7 @@ void EmployeeHandler::addDiscardFeedbackAnswer() {
   std::vector<DTO::FoodItem> discardedFoodItems;
   try {
     discardedFoodItems = getDiscardedFoodItems();
-    showFoodItems(discardedFoodItems);
+    displayFoodItems(discardedFoodItems);
   } catch (std::exception &e) {
     std::cout << "Error getting discarded food items : " << e.what()
               << std::endl;
