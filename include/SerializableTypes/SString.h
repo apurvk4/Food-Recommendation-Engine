@@ -3,7 +3,7 @@
 #include "Serializable.h"
 #include "SerializableTypes/U64.h"
 #include <cstdint>
-#include <cstring> // For memcpy
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -16,32 +16,25 @@ public:
   SString(std::string value) : value{value} {}
   SString() : value{""} { value.clear(); }
 
-  // Conversion operator
   operator std::string() const { return value; }
 
-  // Assignment operator
   SString &operator=(const std::string &other) {
     value = other;
     return *this;
   }
 
-  // Setter
   void setValue(const std::string &value) { this->value = value; }
 
-  // Getter
   std::string getValue() const { return value; }
 
-  // Equality operators
   bool operator==(const SString &other) const { return value == other.value; }
   bool operator!=(const SString &other) const { return value != other.value; }
 
-  // Stream extraction operator
   friend std::istream &operator>>(std::istream &is, SString &s) {
     std::getline(is, s.value);
     return is;
   }
 
-  // Serialization
   std::vector<unsigned char> serialize() override {
     std::vector<unsigned char> bytes;
     U64 size = value.size();
@@ -55,7 +48,6 @@ public:
     return bytes;
   }
 
-  // Deserialization
   size_t deserialize(const std::vector<unsigned char> &bytes) override {
     if (bytes.size() < sizeof(uint64_t)) {
       throw std::runtime_error("Not enough bytes to deserialize SString");
