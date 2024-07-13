@@ -55,7 +55,7 @@ bool MenuDAO::updateMenu(DTO::Menu menu) {
   prepStmt =
       std::shared_ptr<sql::PreparedStatement>(connection->prepareStatement(
           "UPDATE Menu SET menuName = ?, categoryId = ?, isSurvey = ?"
-          "WHERE menuId = ?"));
+          " WHERE menuId = ?"));
   prepStmt->setString(1, (std::string)menu.menuName);
   prepStmt->setUInt64(2, menu.categoryId);
   prepStmt->setBoolean(3, menu.isSurvey);

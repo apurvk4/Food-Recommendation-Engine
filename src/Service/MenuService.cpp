@@ -64,7 +64,7 @@ bool MenuService::updateMenu(DTO::Menu menu,
   } catch (std::exception &e) {
     connection->rollback();
     connection->setAutoCommit(true);
-    throw e;
+    throw;
   }
 }
 

@@ -126,7 +126,8 @@ ChefHandler::getUpdatedMenuItems(std::vector<DTO::MenuItem> &menuItems) {
     std::cout << "Enter item id: ";
     uint64_t itemId =
         inputHandler.getInput<uint64_t>([&itemIdRange](const uint64_t &input) {
-          return input >= itemIdRange.first && input <= itemIdRange.second;
+          return (input >= itemIdRange.first && input <= itemIdRange.second) ||
+                 input == 0;
         });
     if (itemId == 0) {
       break;
