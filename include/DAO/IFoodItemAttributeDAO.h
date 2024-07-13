@@ -6,7 +6,7 @@
 
 namespace DAO {
 
-class IFoodItemAttribute {
+class IFoodItemAttributeDAO {
 public:
   virtual bool addFoodItemAttribute(uint64_t foodItemId,
                                     uint64_t attributeId) = 0;
@@ -19,7 +19,7 @@ public:
                                     uint64_t foodItemId) = 0;
   virtual std::vector<uint64_t>
   getFoodItemsWithGivenAttributes(uint64_t attributeId) = 0;
-  virtual ~IFoodItemAttribute() = default;
+  virtual ~IFoodItemAttributeDAO() = default;
 };
 
 }; // namespace DAO

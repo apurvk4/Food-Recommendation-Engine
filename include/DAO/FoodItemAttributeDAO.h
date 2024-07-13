@@ -1,16 +1,16 @@
 #pragma once
 
 #include "DbConnection.h"
-#include "IFoodItemAttribute.h"
+#include "IFoodItemAttributeDAO.h"
 #include <cstdint>
 
 namespace DAO {
 
-class FoodItemAttribute : public IFoodItemAttribute {
+class FoodItemAttributeDAO : public IFoodItemAttributeDAO {
   std::shared_ptr<DbConnection> dbConnection;
 
 public:
-  FoodItemAttribute();
+  FoodItemAttributeDAO();
   bool addFoodItemAttribute(uint64_t foodItemId, uint64_t attributeId) override;
   bool removeFoodItemAttribute(uint64_t foodItemId,
                                uint64_t attributeId) override;

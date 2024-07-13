@@ -11,18 +11,9 @@ class SocketException : public std::exception {
 
 public:
   SocketException(const std::string &message, SOCKET socket,
-                  ErrorStatus errorStatus) {
-    this->message = message;
-    this->socket = socket;
-    this->errorStatus = errorStatus;
-  }
-  SocketException(const std::string &message, ErrorStatus errorStatus) {
-    this->message = message;
-    this->errorStatus = errorStatus;
-  }
-  std::string getErrorDescription() {
-    return message + " : " + std::to_string(socket);
-  }
-  ErrorStatus getErrorStatus() { return errorStatus; }
-  const char *what() const throw() { return message.c_str(); }
+                  ErrorStatus errorStatus);
+  SocketException(const std::string &message, ErrorStatus errorStatus);
+  std::string getErrorDescription();
+  ErrorStatus getErrorStatus();
+  const char *what() const throw();
 };

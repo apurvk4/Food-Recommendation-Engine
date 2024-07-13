@@ -1,29 +1,29 @@
 #include "Client/TcpClient.h"
 
 TcpClient::TcpClient(const std::string &serverIp, int serverPort)
-    : serverIp_(serverIp), serverPort_(serverPort), sock_(0) {
-  memset(&serv_addr_, 0, sizeof(serv_addr_));
-  serv_addr_.sin_family = AF_INET;
-  serv_addr_.sin_port = htons(serverPort_);
+    : serverIp(serverIp), serverPort(serverPort), sock(0) {
+  memset(&serverAddr, 0, sizeof(serverAddr));
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_port = htons(serverPort);
 }
 
 TcpClient::~TcpClient() {
-  if (sock_ > 0) {
-    close(sock_);
+  if (sock > 0) {
+    close(sock);
   }
 }
 
 bool TcpClient::connectToServer() {
-  if ((sock_ = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     std::cerr << "Socket creation error" << std::endl;
     return false;
   }
-  if (inet_pton(AF_INET, serverIp_.c_str(), &serv_addr_.sin_addr) <= 0) {
+  if (inet_pton(AF_INET, serverIp.c_str(), &serverAddr.sin_addr) <= 0) {
     std::cerr << "Invalid address/ Address not supported" << std::endl;
     return false;
   }
 
-  if (connect(sock_, (struct sockaddr *)&serv_addr_, sizeof(serv_addr_)) < 0) {
+  if (connect(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
     std::cerr << "Connection Failed" << std::endl;
     return false;
   }
@@ -35,7 +35,7 @@ int TcpClient::getLocalPort() {
   struct sockaddr_in localAddr;
   socklen_t addrLen = sizeof(localAddr);
 
-  if (getsockname(sock_, (struct sockaddr *)&localAddr, &addrLen) == -1) {
+  if (getsockname(sock, (struct sockaddr *)&localAddr, &addrLen) == -1) {
     std::cerr << "getsockname() failed" << std::endl;
     return -1;
   }
@@ -44,11 +44,11 @@ int TcpClient::getLocalPort() {
 }
 
 bool TcpClient::sendData(const std::vector<unsigned char> &data) {
-  if (send(sock_, data.data(), data.size(), 0) < 0) {
+  if (send(sock, data.data(), data.size(), 0) < 0) {
     std::cerr << "Send failed" << std::endl;
     return false;
   }
-  ::shutdown(sock_, SHUT_WR);
+  ::shutdown(sock, SHUT_WR);
   return true;
 }
 
@@ -57,7 +57,7 @@ std::vector<unsigned char> TcpClient::receiveData() {
   char buffer[1024];
   int valread;
 
-  while ((valread = read(sock_, buffer, sizeof(buffer))) > 0) {
+  while ((valread = read(sock, buffer, sizeof(buffer))) > 0) {
     receivedData.insert(receivedData.end(), buffer, buffer + valread);
   }
 

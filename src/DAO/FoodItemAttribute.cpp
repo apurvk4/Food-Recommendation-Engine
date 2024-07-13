@@ -1,17 +1,17 @@
-#include "DAO/FoodItemAttribute.h"
+#include "DAO/FoodItemAttributeDAO.h"
 #include "DbConnection.h"
 #include <cppconn/connection.h>
 #include <cppconn/prepared_statement.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 
-using DAO::FoodItemAttribute;
+using DAO::FoodItemAttributeDAO;
 
-FoodItemAttribute::FoodItemAttribute()
+FoodItemAttributeDAO::FoodItemAttributeDAO()
     : dbConnection{DbConnection::getInstance()} {}
 
-bool FoodItemAttribute::addFoodItemAttribute(uint64_t foodItemId,
-                                             uint64_t attributeId) {
+bool FoodItemAttributeDAO::addFoodItemAttribute(uint64_t foodItemId,
+                                                uint64_t attributeId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> addFoodItemAttributeStatement(
       connection->prepareStatement("INSERT INTO FoodItemAttribute (foodItemId, "
@@ -24,8 +24,8 @@ bool FoodItemAttribute::addFoodItemAttribute(uint64_t foodItemId,
   return rowsAffected;
 }
 
-bool FoodItemAttribute::removeFoodItemAttribute(uint64_t foodItemId,
-                                                uint64_t attributeId) {
+bool FoodItemAttributeDAO::removeFoodItemAttribute(uint64_t foodItemId,
+                                                   uint64_t attributeId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> removeFoodItemAttributeStatement(
       connection->prepareStatement("DELETE FROM FoodItemAttribute WHERE "
@@ -39,7 +39,7 @@ bool FoodItemAttribute::removeFoodItemAttribute(uint64_t foodItemId,
 }
 
 std::vector<std::pair<uint64_t, std::string>>
-FoodItemAttribute::getFoodItemAttributes(uint64_t foodItemId) {
+FoodItemAttributeDAO::getFoodItemAttributes(uint64_t foodItemId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> getFoodItemAttributesStatement(
       connection->prepareStatement("SELECT * FROM FoodItemAttribute WHERE "
@@ -67,7 +67,7 @@ FoodItemAttribute::getFoodItemAttributes(uint64_t foodItemId) {
 }
 
 std::vector<std::pair<uint64_t, std::string>>
-FoodItemAttribute::getAllAttributes() {
+FoodItemAttributeDAO::getAllAttributes() {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::Statement> getAllAttributesStatement(
       connection->createStatement());
@@ -82,8 +82,8 @@ FoodItemAttribute::getAllAttributes() {
   return allAttributes;
 }
 
-bool FoodItemAttribute::addFoodItemAttribute(std::vector<uint64_t> attributeIds,
-                                             uint64_t foodItemId) {
+bool FoodItemAttributeDAO::addFoodItemAttribute(
+    std::vector<uint64_t> attributeIds, uint64_t foodItemId) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement> addFoodItemAttributeStatement(
       connection->prepareStatement("INSERT INTO FoodItemAttribute (foodItemId, "
@@ -99,7 +99,7 @@ bool FoodItemAttribute::addFoodItemAttribute(std::vector<uint64_t> attributeIds,
 }
 
 std::vector<uint64_t>
-FoodItemAttribute::getFoodItemsWithGivenAttributes(uint64_t attributeIds) {
+FoodItemAttributeDAO::getFoodItemsWithGivenAttributes(uint64_t attributeIds) {
   std::shared_ptr<sql::Connection> connection = dbConnection->getConnection();
   std::unique_ptr<sql::PreparedStatement>
       getFoodItemsWithGivenAttributesStatement(

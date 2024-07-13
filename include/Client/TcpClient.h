@@ -16,8 +16,8 @@ public:
   int getLocalPort();
 
 private:
-  std::string serverIp_;
-  int serverPort_;
-  int sock_;
-  struct sockaddr_in serv_addr_;
+  std::string serverIp;
+  int serverPort;
+  int sock;
+  struct sockaddr_in serverAddr;
 };

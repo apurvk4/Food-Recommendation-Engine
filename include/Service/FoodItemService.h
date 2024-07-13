@@ -9,7 +9,7 @@
 #include "DTO/Review.h"
 #include "IDiscardFeedbackAnswerDAO.h"
 #include "IDiscardFeedbackQuestionDAO.h"
-#include "IFoodItemAttribute.h"
+#include "IFoodItemAttributeDAO.h"
 #include "IReviewDAO.h"
 #include <memory>
 
@@ -23,20 +23,19 @@ using DTO::FoodItem;
 using DTO::Review;
 
 class FoodItemService {
-  std::shared_ptr<DAO::IFoodItemDAO> m_foodItemDAO;
-  std::shared_ptr<DAO::IFeedbackDAO> m_feedbackDAO;
-  std::shared_ptr<DAO::IReviewDAO> m_reviewDAO;
-  std::shared_ptr<DAO::IFoodItemAttribute> m_foodItemAttributeDAO;
-  std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
-      m_discardFeedbackQuestionDAO;
-  std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> m_discardFeedbackAnswerDAO;
+  std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO;
+  std::shared_ptr<DAO::IFeedbackDAO> feedbackDAO;
+  std::shared_ptr<DAO::IReviewDAO> reviewDAO;
+  std::shared_ptr<DAO::IFoodItemAttributeDAO> foodItemAttributeDAO;
+  std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO> discardFeedbackQuestionDAO;
+  std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO;
 
 public:
   FoodItemService(
       std::shared_ptr<DAO::IFoodItemDAO> foodItemDAO,
       std::shared_ptr<DAO::IFeedbackDAO> feedbackDAO,
       std::shared_ptr<DAO::IReviewDAO> reviewDAO,
-      std::shared_ptr<DAO::IFoodItemAttribute> foodItemAttributeDAO,
+      std::shared_ptr<DAO::IFoodItemAttributeDAO> foodItemAttributeDAO,
       std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
           discardFeedbackQuestionDAO,
       std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO);

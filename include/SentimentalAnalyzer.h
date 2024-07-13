@@ -29,7 +29,7 @@ private:
   void loadStopWords(const std::string &stopWordsFilePath) {
     std::ifstream file(stopWordsFilePath);
     std::string word;
-    while (std::getline(file, word, ',')) { // Split by comma
+    while (std::getline(file, word, ',')) {
       stopWords.insert(word);
     }
   }
@@ -40,7 +40,7 @@ private:
     std::string word;
 
     while (iss >> word) {
-      // Convert word to lowercase for case insensitivity
+
       std::transform(word.begin(), word.end(), word.begin(), ::tolower);
       tokens.push_back(word);
     }
@@ -84,16 +84,12 @@ public:
         ++wordCount;
       }
     }
-
-    // Calculate average score if there are words scored
     if (wordCount > 0) {
       score /= wordCount;
     }
 
-    // Normalize score to range 1 to 5 using a linear mapping
     double normalizedScore = 1.0 + (score + 5.0) / 2.0;
 
-    // Ensure score is within range 1 to 5
     if (normalizedScore < 1.0) {
       normalizedScore = 1.0;
     } else if (normalizedScore > 5.0) {
@@ -114,8 +110,6 @@ public:
         wordCounts[token]++;
       }
     }
-
-    // Create a vector of pairs from the map to sort by value (word count)
     std::vector<std::pair<std::string, int>> sortedWords(wordCounts.begin(),
                                                          wordCounts.end());
     std::sort(sortedWords.begin(), sortedWords.end(),
@@ -123,7 +117,6 @@ public:
                 return a.second > b.second; // Sort by descending count
               });
 
-    // Create a map to return the top N words
     std::unordered_map<std::string, int> topWordsMap;
     for (int i = 0; i < std::min(topN, static_cast<int>(sortedWords.size()));
          ++i) {

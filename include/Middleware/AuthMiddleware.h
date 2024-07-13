@@ -8,8 +8,8 @@ namespace Middleware {
 using Service::UserService;
 
 class AuthMiddleware : public IMiddleware {
-  std::shared_ptr<UserService> m_userService;
-  uint64_t m_targetRoleId;
+  std::shared_ptr<UserService> userService;
+  uint64_t targetRoleId;
 
 public:
   AuthMiddleware(std::shared_ptr<UserService> userService,

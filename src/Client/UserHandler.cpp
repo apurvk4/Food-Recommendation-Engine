@@ -1,7 +1,7 @@
 #include "Client/UserHandler.h"
 #include "Category.h"
+#include "LoginData.h"
 #include "Notification.h"
-#include <regex>
 
 bool UserHandler::viewNotifications(const std::string &endpoint) {
   std::vector<unsigned char> payload = user.userId.serialize();

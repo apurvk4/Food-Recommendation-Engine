@@ -5,7 +5,7 @@ using Middleware::AuthMiddleware;
 
 AuthMiddleware::AuthMiddleware(std::shared_ptr<UserService> userService,
                                uint64_t targetRoleId)
-    : m_userService(userService), m_targetRoleId(targetRoleId) {}
+    : userService(userService), targetRoleId(targetRoleId) {}
 
 bool AuthMiddleware::handleRequest(std::shared_ptr<TcpSocket> socket,
                                    TCPRequest request,
@@ -14,8 +14,8 @@ bool AuthMiddleware::handleRequest(std::shared_ptr<TcpSocket> socket,
   std::vector<unsigned char> buffer;
   bool requestHandled = false;
   try {
-    auto user = m_userService->getUserById(request.protocolHeader.userId);
-    if ((uint64_t)user.roleId != m_targetRoleId) {
+    auto user = userService->getUserById(request.protocolHeader.userId);
+    if ((uint64_t)user.roleId != targetRoleId) {
       SString response = {"Error : unauthorized "};
       auto responseSer = response.serialize();
       writeResponse(buffer, request, 400, responseSer);

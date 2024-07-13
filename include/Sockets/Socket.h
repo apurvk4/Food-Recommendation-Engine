@@ -34,7 +34,6 @@ public:
   in_addr getRemoteIP() const;
   void close();
   Socket(Socket &&other) noexcept;
-  void setTimeout(long sec, long uSec, int optionName);
   void bind(const std::string &localIpAddress, uint16_t port);
   Socket &operator=(Socket &&other) noexcept;
   ~Socket();

@@ -11,7 +11,7 @@
 #include "DbConnection.h"
 #include "DiscardFeedbackAnswerDAO.h"
 #include "DiscardFeedbackQuestionDAO.h"
-#include "FoodItemAttribute.h"
+#include "FoodItemAttributeDAO.h"
 #include "FoodItemDAO.h"
 #include "FoodItemService.h"
 #include "IFeedbackDAO.h"
@@ -66,7 +66,7 @@ void server() {
   auto menuItemDAO = std::make_shared<DAO::MenuItemDAO>();
   auto feedbackDAO = std::make_shared<DAO::FeedbackDAO>();
   auto reviewDAO = std::make_shared<DAO::ReviewDAO>();
-  auto foodItemAttributeDAO = std::make_shared<DAO::FoodItemAttribute>();
+  auto foodItemAttributeDAO = std::make_shared<DAO::FoodItemAttributeDAO>();
   auto userFoodPreferenceDAO = std::make_shared<DAO::UserFoodPreferenceDAO>();
   auto discardFeedbackAnswerDAO =
       std::make_shared<DAO::DiscardFeedbackAnswerDAO>();

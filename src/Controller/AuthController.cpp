@@ -1,5 +1,6 @@
 #include "Controller/AuthController.h"
 #include "ActivityType.h"
+#include "LoginData.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
 #include "Sockets/SocketUtils.h"
 #include "UserService.h"
@@ -11,14 +12,14 @@ using Controller::AuthController;
 AuthController::AuthController(
     const std::string &authEndpoint,
     std::shared_ptr<Service::UserService> userService)
-    : m_baseAuthEndpoint(authEndpoint), m_userService(userService) {
-  m_authRoutes.insert(
+    : baseAuthEndpoint(authEndpoint), userService(userService) {
+  authRoutes.insert(
       {"/login",
        [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
               std::vector<unsigned char> &payload) -> bool {
          return this->login(socket, request, payload);
        }});
-  m_authRoutes.insert(
+  authRoutes.insert(
       {"/logout",
        [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
               std::vector<unsigned char> &payload) -> bool {
@@ -37,16 +38,16 @@ bool AuthController::handleRequest(TcpSocket socket, TCPRequest &request,
       std::make_shared<TcpSocket>(std::move(socket));
   if (std::regex_match(endpoint, match, pattern)) {
     std::string controllerKey = match[2].str();
-    if (m_authRoutes.find(controllerKey) != m_authRoutes.end()) {
-      for (auto &middleware : m_preprocessors) {
+    if (authRoutes.find(controllerKey) != authRoutes.end()) {
+      for (auto &middleware : preprocessors) {
         if (middleware->handleRequest(socketPtr, request, payload)) {
           return true;
         }
       }
-      if (m_authRoutes[controllerKey](socketPtr, request, payload)) {
+      if (authRoutes[controllerKey](socketPtr, request, payload)) {
         return true;
       }
-      for (auto &middleware : m_postprocessors) {
+      for (auto &middleware : postprocessors) {
         if (middleware->handleRequest(socketPtr, request, payload)) {
           return true;
         }
@@ -59,16 +60,16 @@ bool AuthController::handleRequest(TcpSocket socket, TCPRequest &request,
   return false;
 }
 
-std::string AuthController::getEndpoint() { return m_baseAuthEndpoint; }
+std::string AuthController::getEndpoint() { return baseAuthEndpoint; }
 
 void AuthController::registerPreprocessorMiddleware(
     std::shared_ptr<IMiddleware> middleware) {
-  m_preprocessors.push_back(middleware);
+  preprocessors.push_back(middleware);
 }
 
 void AuthController::registerPostprocessorMiddleware(
     std::shared_ptr<IMiddleware> middleware) {
-  m_postprocessors.push_back(middleware);
+  postprocessors.push_back(middleware);
 }
 
 bool AuthController::login(std::shared_ptr<TcpSocket> socket,
@@ -78,9 +79,9 @@ bool AuthController::login(std::shared_ptr<TcpSocket> socket,
   std::vector<unsigned char> buffer;
   try {
     data.deserialize(payload);
-    auto user = m_userService->getUserById(data.userId);
+    auto user = userService->getUserById(data.userId);
     if (user.password == data.password && user.roleId == data.roleId) {
-      m_userService->addActivity(user.userId, DTO::ActivityType::Login);
+      userService->addActivity(user.userId, DTO::ActivityType::Login);
       user.password = "";
       auto result = user.serialize();
       writeResponse(buffer, request, 0, result);
@@ -113,8 +114,8 @@ bool AuthController::logout(std::shared_ptr<TcpSocket> socket,
                             std::vector<unsigned char> &payload) {
   std::vector<unsigned char> buffer;
   try {
-    auto user = m_userService->getUserById(request.protocolHeader.userId);
-    if (m_userService->addActivity(user.userId, DTO::ActivityType::Logout)) {
+    auto user = userService->getUserById(request.protocolHeader.userId);
+    if (userService->addActivity(user.userId, DTO::ActivityType::Logout)) {
       SString response("User logged out");
       auto result = response.serialize();
       writeResponse(buffer, request, 0, result);

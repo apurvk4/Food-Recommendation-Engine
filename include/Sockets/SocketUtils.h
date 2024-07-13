@@ -28,5 +28,3 @@ enum class ErrorStatus {
   E_InvalidDetails,
   E_Unauthorized,
 };
-
-void setTimeout(SOCKET socket, long sec, long uSec, int optionName);

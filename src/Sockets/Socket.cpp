@@ -3,7 +3,6 @@
 #include "Sockets/SocketUtils.h"
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -67,10 +66,6 @@ void Socket::bind(const std::string &localIpAddress, uint16_t localPort) {
                           ErrorStatus::E_InternalServerError);
   }
   this->localPort = localAddress.sin_port;
-}
-
-void Socket::setTimeout(long sec, long uSec, int optionName) {
-  ::setTimeout(socket, sec, uSec, optionName);
 }
 
 std::string Socket::convertIpAddress(in_addr &address) {
