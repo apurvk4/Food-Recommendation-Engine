@@ -15,19 +15,7 @@ class UserHandler {
 protected:
   const DTO::Role roleId;
   DTO::User user;
-  void displayNotification(std::vector<DTO::Notification> &notifications) {
-    std::cout << "\n........Notifications............\n";
-    if (notifications.size() <= 0) {
-      std::cout << "No notifications\n";
-      std::cout << "\n................................\n";
-      return;
-    }
-    for (auto &notification : notifications) {
-      std::cout << "\n--------------------------------\n";
-      std::cout << (std::string)notification.message << std::endl;
-      std::cout << "--------------------------------\n";
-    }
-  }
+  void displayNotification(std::vector<DTO::Notification> &notifications);
 
 public:
   UserHandler(DTO::Role roleId) : roleId(roleId) {}
