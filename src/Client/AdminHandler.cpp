@@ -2,6 +2,7 @@
 #include "Category.h"
 #include "Client/ClientCommunicator.h"
 #include "Client/InputHandler.h"
+#include "Config.h"
 #include "FoodItem.h"
 #include "Role.h"
 #include "SerializableTypes/Pair.h"

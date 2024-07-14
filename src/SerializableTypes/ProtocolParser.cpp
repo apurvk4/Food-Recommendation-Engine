@@ -75,12 +75,12 @@ U64 ProtocolParser::getPayloadSize() {
   return parsedHeader.payloadSize;
 }
 
-U32 ProtocolParser::getRequestId() {
+U32 ProtocolParser::getStatusCode() {
   if (!protocolHeaderParsed) {
     parsedHeader = parseHeader();
     protocolHeaderParsed = true;
   }
-  return parsedHeader.requestId;
+  return parsedHeader.statusCode;
 }
 
 std::string ProtocolParser::getEndpoint() {
@@ -112,7 +112,7 @@ ProtocolHeader ProtocolParser::parseHeader() {
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
   bytesRead += header.receiverPort.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint16_t)));
-  bytesRead += header.requestId.deserialize(
+  bytesRead += header.statusCode.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint32_t)));
   bytesRead += header.payloadSize.deserialize(
       safeSubVector(buffer, bytesRead, bytesRead + sizeof(uint64_t)));

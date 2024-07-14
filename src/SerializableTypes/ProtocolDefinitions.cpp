@@ -10,7 +10,7 @@ void writeProtocolHeader(std::vector<unsigned char> &buffer,
   buffer.insert(buffer.end(), result.begin(), result.end());
   result = header.receiverPort.serialize();
   buffer.insert(buffer.end(), result.begin(), result.end());
-  result = header.requestId.serialize();
+  result = header.statusCode.serialize();
   buffer.insert(buffer.end(), result.begin(), result.end());
   result = header.payloadSize.serialize();
   buffer.insert(buffer.end(), result.begin(), result.end());
@@ -31,7 +31,7 @@ void writeResponse(std::vector<unsigned char> &buffer, TCPRequest &response,
   header.senderPort = response.protocolHeader.receiverPort;
   header.receiverIp = response.protocolHeader.senderIp;
   header.receiverPort = response.protocolHeader.senderPort;
-  header.requestId = responseCode;
+  header.statusCode = responseCode;
   header.payloadSize = payload.size();
   std::memcpy(header.endpoint, response.protocolHeader.endpoint,
               MAX_ENDPOINT_SIZE);

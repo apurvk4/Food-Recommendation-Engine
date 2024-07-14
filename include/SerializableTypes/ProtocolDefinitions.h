@@ -11,7 +11,7 @@ struct ProtocolHeader {
   U16 senderPort;
   U32 receiverIp;
   U16 receiverPort;
-  U32 requestId;
+  U32 statusCode;
   U64 payloadSize;
   U64 userId;
   U64 roleId;

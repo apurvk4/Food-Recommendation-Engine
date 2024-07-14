@@ -26,7 +26,7 @@ void ClientCommunicator::writeHeader(TcpClient &client, TCPRequest &request,
   request.protocolHeader.senderIp = Socket::convertIpAddress(ip).s_addr;
   request.protocolHeader.senderPort = localPort;
   strncpy(request.protocolHeader.endpoint, endpoint.c_str(), MAX_ENDPOINT_SIZE);
-  request.protocolHeader.requestId = 0;
+  request.protocolHeader.statusCode = 0;
 }
 
 void ClientCommunicator::sendRequest(uint64_t userId, uint64_t roleId,
@@ -45,7 +45,7 @@ std::pair<uint32_t, std::vector<unsigned char>>
 ClientCommunicator::receiveResponse() {
   std::vector<unsigned char> buffer = client.receiveData();
   ProtocolParser parser{buffer};
-  uint32_t requestId = parser.getRequestId();
+  uint32_t statusCode = parser.getStatusCode();
   auto payload = parser.getPayload();
-  return {requestId, payload};
+  return {statusCode, payload};
 }

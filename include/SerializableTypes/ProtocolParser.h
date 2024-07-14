@@ -20,7 +20,7 @@ public:
   U16 getSenderPort();
   U32 getReceiverIp();
   U16 getReceiverPort();
-  U32 getRequestId();
+  U32 getStatusCode();
   U64 getPayloadSize();
   U64 getUserId();
   U64 getRoleId();

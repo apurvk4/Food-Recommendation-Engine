@@ -14,7 +14,7 @@ RequestHandler::parseHeaders(std::vector<unsigned char> &data) {
   request.protocolHeader.senderPort = parser.getSenderPort();
   request.protocolHeader.receiverIp = parser.getReceiverIp();
   request.protocolHeader.receiverPort = parser.getReceiverPort();
-  request.protocolHeader.requestId = parser.getRequestId();
+  request.protocolHeader.statusCode = parser.getStatusCode();
   request.protocolHeader.payloadSize = parser.getPayloadSize();
   request.protocolHeader.userId = parser.getUserId();
   request.protocolHeader.roleId = parser.getRoleId();
