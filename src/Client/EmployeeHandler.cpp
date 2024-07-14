@@ -4,6 +4,7 @@
 #include "Client/InputHandler.h"
 #include "Client/TcpClient.h"
 #include "Client/UserHandler.h"
+#include "Config.h"
 #include "DiscardFeedbackAnswer.h"
 #include "Feedback.h"
 #include "FoodItem.h"

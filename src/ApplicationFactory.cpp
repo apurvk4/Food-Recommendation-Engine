@@ -2,6 +2,7 @@
 
 #include "Client/ClientApplication.h"
 #include "Client/UserHandler.h"
+#include "Config.h"
 #include "Controller/AdminController.h"
 #include "Controller/AuthController.h"
 #include "Controller/ChefController.h"

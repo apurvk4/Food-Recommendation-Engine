@@ -1,5 +1,6 @@
 #include "Client/UserHandler.h"
 #include "Category.h"
+#include "Config.h"
 #include "LoginData.h"
 #include "Notification.h"
 

@@ -2,6 +2,7 @@
 #include "Category.h"
 #include "Client/ClientCommunicator.h"
 #include "Client/InputHandler.h"
+#include "Config.h"
 #include "FoodItem.h"
 #include "Menu.h"
 #include "MenuItem.h"
@@ -292,7 +293,7 @@ std::vector<DTO::FoodItem> ChefHandler::getFoodItemRecommendation() {
   DTO::Category category = getCategoryInput();
   std::vector<unsigned char> payload;
   U64 categoryValue = (uint64_t)category;
-  U32 count = 10;
+  U32 count = RECOMMENDED_ITEM_COUNT;
   Pair<U64, U32> categoryPair(categoryValue, count);
   payload = categoryPair.serialize();
   ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);

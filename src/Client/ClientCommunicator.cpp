@@ -1,4 +1,6 @@
 #include "Client/ClientCommunicator.h"
+#include "Client/UserHandler.h"
+#include "Config.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
 #include "SerializableTypes/ProtocolParser.h"
 #include "Sockets/Socket.h"
@@ -20,7 +22,7 @@ void ClientCommunicator::writeHeader(TcpClient &client, TCPRequest &request,
       Socket::convertIpAddress(serverAddress).s_addr;
   request.protocolHeader.receiverPort = serverPort;
   uint16_t localPort = client.getLocalPort();
-  std::string ip{"127.0.0.1"};
+  std::string ip{SERVER_IP};
   request.protocolHeader.senderIp = Socket::convertIpAddress(ip).s_addr;
   request.protocolHeader.senderPort = localPort;
   strncpy(request.protocolHeader.endpoint, endpoint.c_str(), MAX_ENDPOINT_SIZE);
