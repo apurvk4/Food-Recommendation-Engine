@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Serializable.h"
+#include "Util.h"
 #include <cmath>
 #include <cstdint>
 #include <cstring>
