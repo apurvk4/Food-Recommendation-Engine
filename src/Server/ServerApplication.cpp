@@ -3,6 +3,7 @@
 #include "Server/LoadBalancer.h"
 #include "Sockets/Socket.h"
 #include "Sockets/SocketUtils.h"
+#include <cerrno>
 #include <cstring>
 
 using Server::ServerApplication;
@@ -91,28 +92,29 @@ void ServerApplication::start() {
   SOCKET acceptedSocket = 0;
 
   while (isRunning.load()) {
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(serverSocket, &readfds);
+    fd_set readFileDiscriptors;
+    FD_ZERO(&readFileDiscriptors);
+    FD_SET(serverSocket, &readFileDiscriptors);
 
     struct timeval timeout;
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    int ready = select(serverSocket + 1, &readfds, NULL, NULL, &timeout);
+    int ready =
+        select(serverSocket + 1, &readFileDiscriptors, NULL, NULL, &timeout);
     if (ready == -1) {
-      perror("select");
+      std::cerr << "select call error : " << strerror(errno) << "\n";
       break;
     } else if (ready == 0) {
       continue;
     }
 
-    if (FD_ISSET(serverSocket, &readfds)) {
+    if (FD_ISSET(serverSocket, &readFileDiscriptors)) {
       sockaddr_in remoteAddress;
       memset(&remoteAddress, 0, sizeof(remoteAddress));
       acceptedSocket = accept(serverSocket, (sockaddr *)&remoteAddress, &size);
       if (acceptedSocket == -1) {
-        perror("accept");
+        std::cerr << "accept error : " << strerror(errno) << "\n";
         continue;
       }
       loadBalancer.distributeTask(

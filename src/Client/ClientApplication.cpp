@@ -25,10 +25,10 @@ void ClientApplication::start() {
         [](const int &input) { return input >= 1 && input <= 3; });
     handleUserSelection(choice);
     userHandler.reset();
-    char ch;
+    char inputCharacter;
     std::cout << "Do you want to continue? (y/n): ";
-    std::cin >> ch;
-    if (ch != 'y') {
+    std::cin >> inputCharacter;
+    if (inputCharacter != 'y') {
       break;
     }
   }
