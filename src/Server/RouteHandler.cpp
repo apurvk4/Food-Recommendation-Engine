@@ -1,6 +1,6 @@
 #include "Server/RouteHandler.h"
-#include "Controller/IController.h"
 #include "SerializableTypes/ProtocolDefinitions.h"
+#include "Server/Controller/IController.h"
 #include "Sockets/SocketUtils.h"
 #include <cstring>
 #include <regex>
