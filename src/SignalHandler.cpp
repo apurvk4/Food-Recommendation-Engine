@@ -22,17 +22,7 @@ void SignalHandler::stopApplication() {
 }
 
 void SignalHandler::handleSignal(int signal) {
-  switch (signal) {
-  case SIGTERM:
-    std::cout << "\nReceived SIGTERM\n";
+  if (signal == SIGTERM or signal == SIGINT) {
     stopApplication();
-    break;
-  case SIGINT:
-    std::cout << "\nReceived SIGINT\n";
-    stopApplication();
-    break;
-  default:
-    std::cout << "\nReceived signal " << signal << "\n";
-    break;
   }
 }
