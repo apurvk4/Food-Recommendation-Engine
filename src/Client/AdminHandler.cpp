@@ -194,6 +194,9 @@ void AdminHandler::handleUserSelection(int choice) {
     removeFoodItemAttribute();
     break;
   case 9:
+    addAttribute();
+    break;
+  case 10:
     logout();
     break;
   default:
@@ -216,12 +219,13 @@ void AdminHandler::performAction() {
               << "6. set FoodItem Attribute\n"
               << "7. get FoodItem Attribute\n"
               << "8. remove FoodItem Attribute\n"
-              << "9. Logout\n"
+              << "9. Add Attribute\n"
+              << "10. Logout\n"
               << "Enter your choice: ";
     choice = inputHandler.getInput<int>(
-        [](const int &input) { return input >= 1 && input <= 9; });
+        [](const int &input) { return input >= 1 && input <= 10; });
     handleUserSelection(choice);
-  } while (choice != 9);
+  } while (choice != 10);
 }
 
 AdminHandler::AdminHandler()
@@ -287,7 +291,7 @@ void AdminHandler::setFoodItemAttribute() {
   payload = foodItemId.serialize();
   for (auto &attribute : selectedAttributes) {
     if (!updateFoodItemAttribute(foodItemId, attribute,
-                                 "/Admin/addAttribute")) {
+                                 "/Admin/addFoodAttribute")) {
       break;
     }
   }
@@ -382,5 +386,50 @@ void AdminHandler::removeFoodItemAttribute() {
                                  "/Admin/removeAttribute")) {
       break;
     }
+  }
+}
+
+void AdminHandler::addAttribute() {
+  auto attributes = getAllAttributes();
+  // display attributes
+  std::cout << "Existing attributes\n\n";
+  for (auto &attribute : attributes) {
+    std::cout << "Attribute Id: " << attribute.first
+              << " Attribute Name: " << attribute.second << std::endl;
+  }
+  std::cout << "\n\n\n";
+  InputHandler inputHandler;
+  std::string attributeName;
+  std::cout << "Enter attribute name: ";
+  std::getline(std::cin >> std::ws, attributeName);
+  // check if attribute already exists
+  auto attribute = std::find_if( // NOLINT
+      attributes.begin(), attributes.end(),
+      [attributeName](const std::pair<uint64_t, std::string> &attr) {
+        return attr.second == attributeName;
+      });
+  if (attribute != attributes.end()) {
+    std::cout << "Attribute already exists\n";
+    return;
+  }
+  std::cout << "\n\n\n";
+  addAttribte(attributeName);
+}
+
+void AdminHandler::addAttribte(const std::string &attributeName) {
+  std::vector<unsigned char> payload;
+  SString attribute(attributeName);
+  payload = attribute.serialize();
+  ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
+  clientCommunicator.sendRequest(user.userId, (uint64_t)roleId,
+                                 "/Admin/addAttribute", payload);
+  auto response = clientCommunicator.receiveResponse();
+  if (response.first == 0) {
+    std::cout << "Attribute added successfully\n";
+  } else {
+    SString responseString;
+    responseString.deserialize(response.second);
+    std::cout << "Failed to add attribute, due to : "
+              << (std::string)responseString << std::endl;
   }
 }

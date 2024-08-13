@@ -4,6 +4,7 @@
 #include "DTO/Feedback.h"
 #include "DTO/FoodItem.h"
 #include "DTO/Review.h"
+#include "Server/DAO/AttributeDAO.h"
 #include "Server/DAO/IDiscardFeedbackAnswerDAO.h"
 #include "Server/DAO/IDiscardFeedbackQuestionDAO.h"
 #include "Server/DAO/IFeedbackDAO.h"
@@ -28,6 +29,7 @@ class FoodItemService {
   std::shared_ptr<DAO::IFoodItemAttributeDAO> foodItemAttributeDAO;
   std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO> discardFeedbackQuestionDAO;
   std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO;
+  std::shared_ptr<DAO::AttributeDAO> attributeDAO;
 
 public:
   FoodItemService(
@@ -37,7 +39,8 @@ public:
       std::shared_ptr<DAO::IFoodItemAttributeDAO> foodItemAttributeDAO,
       std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
           discardFeedbackQuestionDAO,
-      std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO);
+      std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO,
+      std::shared_ptr<DAO::AttributeDAO> attributeDAO);
 
   bool addFoodItem(FoodItem foodItem);
   bool updateFoodItem(FoodItem foodItem);
@@ -60,6 +63,7 @@ public:
   std::vector<std::pair<uint64_t, std::string>>
   getFoodItemAttributes(uint64_t foodItemId);
   std::vector<std::pair<uint64_t, std::string>> getAllAttributes();
+  bool addAttribute(std::string attributeName);
   bool removeAttributeFromFoodItem(uint64_t foodItemId, uint64_t attributeId);
   bool addAttributesToFoodItem(std::vector<uint64_t> attributeIds,
                                uint64_t foodItemId);

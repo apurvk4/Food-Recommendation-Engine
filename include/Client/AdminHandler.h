@@ -22,6 +22,8 @@ class AdminHandler : public UserHandler {
   std::vector<std::pair<uint64_t, std::string>> getAllAttributes();
   bool updateFoodItemAttribute(U64 foodItemId, U64 attributeId,
                                const std::string &endpoint);
+  void addAttribute();
+  void addAttribte(const std::string &attributeName);
 
 public:
   AdminHandler();

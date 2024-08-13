@@ -80,13 +80,14 @@ IApplication *ApplicationFactory::createServerApplication() {
       std::make_shared<DAO::DiscardFeedbackAnswerDAO>();
   auto discardFeedbackQuestionDAO =
       std::make_shared<DAO::DiscardFeedbackQuestionDAO>();
+  auto attributeDAO = std::make_shared<DAO::AttributeDAO>();
 
   // Services
   auto userService = std::make_shared<Service::UserService>(
       userDAO, userActivityDAO, notificationDAO, userFoodPreferenceDAO);
   auto foodItemService = std::make_shared<Service::FoodItemService>(
       foodItemDAO, feedbackDAO, reviewDAO, foodItemAttributeDAO,
-      discardFeedbackQuestionDAO, discardFeedbackAnswerDAO);
+      discardFeedbackQuestionDAO, discardFeedbackAnswerDAO, attributeDAO);
   auto menuService =
       std::make_shared<Service::MenuService>(menuDAO, foodItemDAO, menuItemDAO);
   auto recommendationService =

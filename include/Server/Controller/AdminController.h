@@ -31,8 +31,9 @@ class AdminController : public IController {
                std::vector<unsigned char> &payload);
   bool viewNotifications(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                          std::vector<unsigned char> &payload);
-  bool addAttribute(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
-                    std::vector<unsigned char> &payload);
+  bool addFoodItemAttribute(std::shared_ptr<TcpSocket> socket,
+                            TCPRequest &request,
+                            std::vector<unsigned char> &payload);
   bool getAllAttributes(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                         std::vector<unsigned char> &payload);
   bool viewFoodItemAttributes(std::shared_ptr<TcpSocket> socket,
@@ -40,6 +41,8 @@ class AdminController : public IController {
                               std::vector<unsigned char> &payload);
   bool removeAttribute(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
                        std::vector<unsigned char> &payload);
+  bool addAttribute(std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+                    std::vector<unsigned char> &payload);
 
 public:
   AdminController(const std::string &authEndpoint,

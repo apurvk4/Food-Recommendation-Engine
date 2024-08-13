@@ -51,10 +51,10 @@ AdminController::AdminController(
          return this->viewNotifications(socket, request, payload);
        }});
   authRoutes.insert(
-      {"/addAttribute",
+      {"/addFoodAttribute",
        [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
               std::vector<unsigned char> &payload) -> bool {
-         return this->addAttribute(socket, request, payload);
+         return this->addFoodItemAttribute(socket, request, payload);
        }});
   authRoutes.insert(
       {"/getAllAttributes",
@@ -73,6 +73,12 @@ AdminController::AdminController(
        [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
               std::vector<unsigned char> &payload) -> bool {
          return this->removeAttribute(socket, request, payload);
+       }});
+  authRoutes.insert(
+      {"/addAttribute",
+       [this](std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+              std::vector<unsigned char> &payload) -> bool {
+         return this->addAttribute(socket, request, payload);
        }});
 };
 
@@ -304,9 +310,9 @@ bool AdminController::viewNotifications(std::shared_ptr<TcpSocket> socket,
   return true;
 }
 
-bool AdminController::addAttribute(std::shared_ptr<TcpSocket> socket,
-                                   TCPRequest &request,
-                                   std::vector<unsigned char> &payload) {
+bool AdminController::addFoodItemAttribute(
+    std::shared_ptr<TcpSocket> socket, TCPRequest &request,
+    std::vector<unsigned char> &payload) {
   std::vector<unsigned char> responseBuffer;
   try {
     Pair<U64, U64> data;
@@ -412,6 +418,37 @@ bool AdminController::removeAttribute(std::shared_ptr<TcpSocket> socket,
   } catch (std::exception &e) {
     std::cout << "Error removing attribute: " << e.what() << std::endl;
     SString responseString{"Failed to remove attribute due to : " +
+                           std::string(e.what())};
+    std::vector<unsigned char> responsePayload = responseString.serialize();
+    writeResponse(responseBuffer, request, 400, responsePayload);
+  }
+  try {
+    socket->sendData(responseBuffer);
+  } catch (std::exception &e) {
+    std::cout << "Error sending response: " << e.what() << std::endl;
+    return false;
+  }
+  return true;
+}
+
+bool AdminController::addAttribute(std::shared_ptr<TcpSocket> socket,
+                                   TCPRequest &request,
+                                   std::vector<unsigned char> &payload) {
+  std::vector<unsigned char> responseBuffer;
+  try {
+    SString attribute;
+    attribute.deserialize(payload);
+    if (foodItemService->addAttribute(attribute)) {
+      std::vector<unsigned char> responsePayload;
+      writeResponse(responseBuffer, request, 0, responsePayload);
+    } else {
+      SString responseString{"Failed to add attribute"};
+      std::vector<unsigned char> responsePayload = responseString.serialize();
+      writeResponse(responseBuffer, request, 400, responsePayload);
+    }
+  } catch (std::exception &e) {
+    std::cout << "Error adding attribute: " << e.what() << std::endl;
+    SString responseString{"Failed to add attribute due to : " +
                            std::string(e.what())};
     std::vector<unsigned char> responsePayload = responseString.serialize();
     writeResponse(responseBuffer, request, 400, responsePayload);

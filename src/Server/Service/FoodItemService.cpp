@@ -12,11 +12,13 @@ FoodItemService::FoodItemService(
     std::shared_ptr<DAO::IFoodItemAttributeDAO> foodItemAttributeDAO,
     std::shared_ptr<DAO::IDiscardFeedbackQuestionDAO>
         discardFeedbackQuestionDAO,
-    std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO)
+    std::shared_ptr<DAO::IDiscardFeedbackAnswerDAO> discardFeedbackAnswerDAO,
+    std::shared_ptr<DAO::AttributeDAO> attributeDAO)
     : foodItemDAO(foodItemDAO), feedbackDAO(feedbackDAO), reviewDAO(reviewDAO),
       foodItemAttributeDAO{foodItemAttributeDAO},
       discardFeedbackQuestionDAO{discardFeedbackQuestionDAO},
-      discardFeedbackAnswerDAO(discardFeedbackAnswerDAO) {}
+      discardFeedbackAnswerDAO(discardFeedbackAnswerDAO),
+      attributeDAO(attributeDAO) {}
 
 bool FoodItemService::addFoodItem(FoodItem foodItem) {
   return foodItemDAO->addFoodItem(foodItem);
@@ -186,4 +188,8 @@ FoodItemService::getAnswerByQuestionId(uint64_t questionId) {
 
 std::vector<DTO::FoodItem> FoodItemService::getDiscardedFoodItems() {
   return foodItemDAO->getDiscardedFoodItems();
+}
+
+bool FoodItemService::addAttribute(std::string attributeName) {
+  return attributeDAO->addAttribute(attributeName);
 }
