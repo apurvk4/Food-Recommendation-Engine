@@ -507,11 +507,15 @@ void ChefHandler::discardFoodItem() {
       getFoodItemsBelowRating(thresholdRating);
   displayFoodItems(foodItems);
   std::pair<uint64_t, uint64_t> itemIdRange = getItemIdRange(foodItems);
-  std::cout << "Enter the item id to discard: ";
+  std::cout << "Enter the item id to discard(or enter 0 to exit): ";
   U64 itemId =
       inputHandler.getInput<uint64_t>([itemIdRange](const uint64_t &input) {
-        return input >= itemIdRange.first && input <= itemIdRange.second;
+        return input >= itemIdRange.first && input <= itemIdRange.second ||
+               input == 0;
       });
+  if (itemId == (U64)0) {
+    return;
+  }
   std::vector<unsigned char> payload = itemId.serialize();
 
   ClientCommunicator clientCommunicator(SERVER_IP, SERVER_PORT);
