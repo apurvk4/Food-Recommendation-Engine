@@ -3,6 +3,9 @@
 #include "IController.h"
 #include "Server/Service/FoodItemService.h"
 #include "Server/Service/UserService.h"
+#include <unordered_map>
+#include <functional>
+
 namespace Controller {
 
 class AdminController : public IController {

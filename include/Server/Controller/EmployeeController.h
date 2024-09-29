@@ -5,6 +5,8 @@
 #include "Server/Service/MenuService.h"
 #include "Server/Service/RecommendationService.h"
 #include "Server/Service/UserService.h"
+#include <functional>
+#include <unordered_map>
 
 namespace Controller {
 

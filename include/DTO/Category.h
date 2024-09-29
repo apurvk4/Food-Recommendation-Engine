@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 #include <string>
+#include <cstdint>
+
 namespace DTO {
 
 enum class Category : uint64_t {
